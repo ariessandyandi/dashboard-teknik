@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
+  <title>PLN ULP Sekura | Temuan Inspeksi</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-color: #0f172a;
+      --card-color: #1e293b;
+      --sidebar-color: #111827;
+      --text-color: white;
+      --text-secondary: #94a3b8;
+      --hover-bg: rgba(59,130,246,0.12);
+      --border-color: rgba(255,255,255,0.05);
+      --shadow-sm: 0 10px 25px -5px rgba(0,0,0,0.1);
+      --transition: all 0.25s cubic-bezier(0.2,0.9,0.4,1.1);
+    }
+
+    body.light-mode {
+      --bg-color: #f1f5f9;
+      --card-color: #ffffff;
+      --sidebar-color: #eef2ff;
+      --text-color: #0f172a;
+      --text-secondary: #475569;
+      --hover-bg: #e2e8f0;
+      --border-color: rgba(0,0,0,0.05);
+      --shadow-sm: 0 10px 25px -5px rgba(0,0,0,0.05);
+    }
+
+    body {
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      transition: background 0.25s ease, color 0.2s ease;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 280px;
+      height: 100vh;
+      background: var(--sidebar-color);
+      position: fixed;
+      top: 0; left: 0;
+      padding: 28px 20px;
+      border-right: 1px solid var(--border-color);
+      transition: var(--transition);
+      z-index: 1050;
+      overflow-x: hidden;
+    }
+
+    .sidebar.collapsed { width: 88px; padding: 28px 12px; }
+    .sidebar.collapsed .logo-section h4,
+    .sidebar.collapsed .logo-section small { display: none; }
+    .sidebar.collapsed .logo-section { justify-content: center; }
+    .sidebar.collapsed .nav-link span { display: none; }
+    .sidebar.collapsed .nav-link i { margin-right: 0; font-size: 1.6rem; }
+    .sidebar.collapsed .nav-link { text-align: center; padding: 14px 0; justify-content: center; }
+
+    .logo-section {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 48px;
+    }
+    .logo-section img { width: 70px; height: 70px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+    .logo-section h4 { font-size: 1.5rem; font-weight: 700; margin: 0; background: linear-gradient(135deg,#60a5fa,#3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .logo-section small { font-size: 0.75rem; color: var(--text-secondary); display: block; }
+
+    .nav-link {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 16px; border-radius: 12px; margin-bottom: 6px;
+      color: var(--text-secondary); font-weight: 500; font-size: 0.92rem;
+      text-decoration: none; transition: var(--transition);
+    }
+    .nav-link:hover { background: var(--hover-bg); color: var(--text-color); }
+    .nav-link.active { background: #3b82f6; color: white; }
+    .nav-link i { font-size: 1.1rem; width: 20px; text-align: center; }
+
+    .collapse-btn {
+      width: 100%; background: transparent; border: 1px solid var(--border-color);
+      border-radius: 10px; color: var(--text-secondary); padding: 10px;
+      cursor: pointer; margin-top: 16px; transition: var(--transition);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      font-size: 0.85rem;
+    }
+    .collapse-btn:hover { background: var(--hover-bg); color: var(--text-color); }
+    .sidebar.collapsed .collapse-btn span { display: none; }
+
+    /* CONTENT */
+    .content {
+      margin-left: 280px; padding: 32px;
+      min-height: 100vh; transition: margin-left 0.25s cubic-bezier(0.2,0.9,0.4,1.1);
+    }
+    .content.expanded { margin-left: 88px; }
+
+    /* PAGE TITLE */
+    .page-title h2 { font-size: 1.8rem; font-weight: 700; }
+    .datetime { color: var(--text-secondary); font-size: 0.85rem; }
+
+    /* THEME TOGGLE */
+    .theme-toggle {
+      background: var(--card-color); border: 1px solid var(--border-color);
+      border-radius: 10px; padding: 10px 14px; color: var(--text-color);
+      cursor: pointer; transition: var(--transition);
+    }
+    .theme-toggle:hover { background: var(--hover-bg); }
+
+    /* STAT CARDS */
+    .stat-card {
+      background: var(--card-color);
+      border-radius: 16px;
+      padding: 20px 24px;
+      border: 1px solid var(--border-color);
+      display: flex; align-items: center; gap: 16px;
+    }
+    .stat-card .icon-wrap {
+      width: 50px; height: 50px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; flex-shrink: 0;
+    }
+    .stat-card .stat-label { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 2px; }
+    .stat-card .stat-value { font-size: 1.6rem; font-weight: 700; }
+
+    /* LEGEND */
+    .legend-card {
+      background: var(--card-color);
+      border-radius: 16px;
+      padding: 20px 20px;
+      border: 1px solid var(--border-color);
+      max-height: 540px;
+      overflow-y: auto;
+    }
+    .legend-card h6 { font-size: 0.78rem; font-weight: 700; margin-bottom: 14px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; }
+    .legend-section-title { font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin: 12px 0 6px; font-weight: 600; opacity: 0.7; }
+    .legend-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.82rem; color: var(--text-color); }
+    .legend-icon { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; }
+    .legend-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(255,255,255,0.15); }
+
+    /* MAP */
+    .map-card {
+      background: var(--card-color);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+    #map { height: 520px; width: 100%; }
+
+    /* TABLE */
+    .table-card {
+      background: var(--card-color);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid var(--border-color);
+    }
+    .table-card h5 { font-size: 1rem; font-weight: 600; margin-bottom: 16px; }
+    .table-responsive { max-height: 350px; overflow-y: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    thead th {
+      background: var(--bg-color); color: var(--text-secondary);
+      padding: 10px 12px; text-align: left; font-weight: 600;
+      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em;
+      position: sticky; top: 0; z-index: 1; user-select: none;
+    }
+    thead th:hover { color: var(--text-color); }
+    .sort-icon { font-size: 0.7rem; opacity: 0.5; margin-left: 2px; }
+    thead th.sort-asc .sort-icon::after { content: '▲'; }
+    thead th.sort-desc .sort-icon::after { content: '▼'; }
+    thead th.sort-asc .sort-icon, thead th.sort-desc .sort-icon { opacity: 1; color: #3b82f6; }
+    tbody tr { border-bottom: 1px solid var(--border-color); transition: background 0.15s; cursor: pointer; }
+    tbody tr:hover { background: var(--hover-bg); }
+    tbody tr.active-row { background: rgba(59,130,246,0.15) !important; border-left: 3px solid #3b82f6; }
+    tbody td { padding: 10px 12px; color: var(--text-color); vertical-align: middle; }
+    .badge-kategori {
+      padding: 4px 10px; border-radius: 20px; font-size: 0.75rem;
+      font-weight: 600; white-space: nowrap;
+    }
+
+    /* FILTER BAR */
+    .filter-bar {
+      background: var(--card-color);
+      border-radius: 16px; padding: 16px 20px;
+      border: 1px solid var(--border-color);
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    }
+    .filter-bar select, .filter-bar input {
+      background: var(--bg-color); border: 1px solid var(--border-color);
+      color: var(--text-color); border-radius: 10px;
+      padding: 8px 14px; font-size: 0.85rem; outline: none;
+    }
+    .filter-bar select:focus, .filter-bar input:focus { border-color: #3b82f6; }
+
+    /* LOADING */
+    .loading-overlay {
+      position: fixed; inset: 0; background: var(--bg-color);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 9999; gap: 16px;
+    }
+    .spinner {
+      width: 48px; height: 48px; border: 4px solid var(--border-color);
+      border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* MOBILE */
+    .mobile-menu-btn {
+      display: none; position: fixed; top: 16px; left: 16px;
+      z-index: 1100; background: var(--card-color);
+      border: 1px solid var(--border-color); border-radius: 10px;
+      padding: 10px 13px; color: var(--text-color); cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .mobile-menu-btn { display: block; }
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.mobile-open { transform: translateX(0); }
+      .content { margin-left: 0 !important; padding: 20px; padding-top: 64px; }
+    }
+
+    /* POPUP LEAFLET */
+    .leaflet-popup-content-wrapper {
+      background: #1e293b !important; color: white !important;
+      border-radius: 12px !important; border: 1px solid rgba(255,255,255,0.1) !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
+    }
+    .leaflet-popup-tip { background: #1e293b !important; }
+    .popup-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 10px; color: #60a5fa; }
+    .popup-row { display: flex; gap: 8px; margin-bottom: 6px; font-size: 0.82rem; }
+    .popup-label { color: #94a3b8; min-width: 80px; }
+    .popup-val { color: white; flex: 1; }
+    .popup-evidence { margin-top: 10px; }
+    .popup-evidence a {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #3b82f6; color: white; padding: 6px 12px;
+      border-radius: 8px; font-size: 0.8rem; text-decoration: none;
+      transition: background 0.2s;
+    }
+    .popup-evidence a:hover { background: #2563eb; }
+
+    body.light-mode .leaflet-popup-content-wrapper {
+      background: #ffffff !important; color: #0f172a !important;
+    }
+    body.light-mode .leaflet-popup-tip { background: #ffffff !important; }
+    body.light-mode .popup-title { color: #2563eb; }
+    body.light-mode .popup-label { color: #475569; }
+    body.light-mode .popup-val { color: #0f172a; }
+  </style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div style="color: var(--text-secondary); font-size: 0.9rem;">Memuat data temuan inspeksi...</div>
+</div>
+
+<!-- Mobile Menu -->
+<button class="mobile-menu-btn" id="mobileMenuBtn">
+  <i class="fa-solid fa-bars"></i>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="logo-section">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/9/97/Logo_PLN.png" alt="PLN Logo">
+    <div>
+      <h4>ULP Sekura</h4>
+      <small>Kinerja Teknik</small>
+    </div>
+  </div>
+  <nav>
+    <a href="index.html" class="nav-link" data-title="Dashboard">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+    <a href="data-gardu.html" class="nav-link" data-title="Data Gardu">
+      <i class="fa-solid fa-building"></i>
+      <span>Data Gardu</span>
+    </a>
+    <a href="temuan-inspeksi.html" class="nav-link active" data-title="Temuan Inspeksi">
+      <i class="fa-solid fa-map-location-dot"></i>
+      <span>Temuan Inspeksi</span>
+    </a>
+    <a href="#" class="nav-link" data-title="Reports">
+      <i class="fa-solid fa-file-lines"></i>
+      <span>Reports</span>
+    </a>
+  </nav>
+  <button class="collapse-btn" id="collapseBtn">
+    <i class="fa-solid fa-chevron-left" id="collapseIcon"></i>
+    <span>Sembunyikan</span>
+  </button>
+</div>
+
+<!-- Main Content -->
+<div class="content" id="mainContent">
+  <!-- Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div class="page-title">
+      <h2>Temuan Inspeksi</h2>
+      <div class="datetime mt-2">
+        <i class="fa-regular fa-calendar-alt"></i> <span id="dateText">Loading...</span>
+        <i class="fa-regular fa-clock ms-2"></i> <span id="timeText">--:--:--</span>
+      </div>
+    </div>
+    <div class="d-flex gap-3">
+      <button class="theme-toggle" id="themeToggleBtn">
+        <i class="fa-solid fa-moon" id="themeIcon"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="row g-3 mb-4" id="statCards">
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="icon-wrap" style="background: rgba(59,130,246,0.15); color: #3b82f6;">
+          <i class="fa-solid fa-list-check"></i>
+        </div>
+        <div>
+          <div class="stat-label">Total Temuan</div>
+          <div class="stat-value" id="totalTemuan">-</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="icon-wrap" style="background: rgba(239,68,68,0.15); color: #ef4444;">
+          <i class="fa-solid fa-tower-broadcast"></i>
+        </div>
+        <div>
+          <div class="stat-label">Tiang Keropos</div>
+          <div class="stat-value" id="totalTiang">-</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="icon-wrap" style="background: rgba(245,158,11,0.15); color: #f59e0b;">
+          <i class="fa-solid fa-bolt"></i>
+        </div>
+        <div>
+          <div class="stat-label">PHBTR</div>
+          <div class="stat-value" id="totalPHBTR">-</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="icon-wrap" style="background: rgba(16,185,129,0.15); color: #10b981;">
+          <i class="fa-solid fa-screwdriver-wrench"></i>
+        </div>
+        <div>
+          <div class="stat-label">Lainnya</div>
+          <div class="stat-value" id="totalLainnya">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar mb-4">
+    <i class="fa-solid fa-filter" style="color: var(--text-secondary);"></i>
+    <select id="filterKategori" onchange="applyFilter()">
+      <option value="">Semua Kategori</option>
+    </select>
+    <select id="filterPenyulang" onchange="applyFilter()">
+      <option value="">Semua Penyulang</option>
+    </select>
+    <input type="text" id="searchInput" placeholder="Cari temuan / lokasi..." oninput="applyFilter()" style="min-width:200px;">
+    <button onclick="resetFilter()" style="background:#3b82f6; border:none; color:white; padding:8px 16px; border-radius:10px; font-size:0.85rem; cursor:pointer;">
+      <i class="fa-solid fa-rotate-left me-1"></i> Reset
+    </button>
+    <span style="margin-left:auto; color:var(--text-secondary); font-size:0.82rem;" id="filterInfo"></span>
+  </div>
+
+  <div class="row g-4">
+    <!-- Map -->
+    <div class="col-lg-9">
+      <div class="map-card">
+        <div id="map"></div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="col-lg-3">
+      <div class="legend-card">
+        <h6>Legenda</h6>
+
+        <div class="legend-section-title">— Gambar Icon —</div>
+        <div class="legend-item">
+          <img src="https://cdn-icons-png.flaticon.com/512/649/649813.png" class="legend-icon" alt="Trafo Rembes">
+          <span>Trafo Rembes</span>
+        </div>
+        <div class="legend-item">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLU2sAmgTgX686SbaSxNZ-6Oy8DrXxvK_c6en5gn-T-A&s=10" class="legend-icon" alt="Tiang Keropos">
+          <span>Tiang Keropos</span>
+        </div>
+        <div class="legend-item">
+          <img src="https://png.pngtree.com/png-vector/20221007/ourmid/pngtree-electrical-box-panel-png-image_6290737.png" class="legend-icon" alt="PHBTR">
+          <span>PHBTR Keropos</span>
+        </div>
+        <div class="legend-item">
+          <img src="https://lytepoles.com/wp-content/uploads/2019/12/rmbracketforwood.png" class="legend-icon" alt="Brace">
+          <span>Brace Keropos</span>
+        </div>
+        <div class="legend-item">
+          <img src="https://png.pngtree.com/png-clipart/20230930/original/pngtree-electric-pole-icon-single-background-illustration-vector-png-image_12913984.png" class="legend-icon" alt="Gardu">
+          <span>Konstruksi Gardu</span>
+        </div>
+
+        <div class="legend-section-title">— Marker Warna —</div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#f97316;"></div>
+          <span>Tiang Miring</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#8b5cf6;"></div>
+          <span>Tiang Drug Keropos</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#f59e0b;"></div>
+          <span>Isolator Pecah</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#10b981;"></div>
+          <span>Andongan Rendah</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#06b6d4;"></div>
+          <span>Traves Miring</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#0ea5e9;"></div>
+          <span>Traves Keropos</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#ec4899;"></div>
+          <span>Opstik Terkupas</span>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="col-12 mt-2">
+      <div class="table-card">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+          <h5 style="margin:0;"><i class="fa-solid fa-table me-2" style="color:#3b82f6;"></i>Daftar Temuan</h5>
+          <button onclick="downloadExcel()" style="background:#10b981;border:none;color:white;padding:8px 18px;border-radius:10px;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:8px;">
+            <i class="fa-solid fa-file-excel"></i> Download Excel
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table id="mainTable">
+            <thead>
+              <tr>
+                <th onclick="sortTable(0)" style="cursor:pointer;">No <span class="sort-icon">⇅</span></th>
+                <th onclick="sortTable(1)" style="cursor:pointer;">ULP <span class="sort-icon">⇅</span></th>
+                <th onclick="sortTable(2)" style="cursor:pointer;">Temuan <span class="sort-icon">⇅</span></th>
+                <th onclick="sortTable(3)" style="cursor:pointer;">Penyulang <span class="sort-icon">⇅</span></th>
+                <th onclick="sortTable(4)" style="cursor:pointer;">Lokasi <span class="sort-icon">⇅</span></th>
+                <th onclick="sortTable(5)" style="cursor:pointer;">Kategori <span class="sort-icon">⇅</span></th>
+                <th onclick="sortTable(6)" style="cursor:pointer;">Jenis Tiang TM <span class="sort-icon">⇅</span></th>
+                <th onclick="sortTable(7)" style="cursor:pointer;">TR <span class="sort-icon">⇅</span></th>
+                <th>Evidence</th>
+              </tr>
+            </thead>
+            <tbody id="tabelTemuan">
+              <tr><td colspan="9" style="text-align:center; color:var(--text-secondary); padding:24px;">Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- SheetJS untuk export Excel -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<script>
+  // ====================== CONFIG ======================
+  const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTxJWuRpxxFJUaRKp-VdalrXsnbaiD1hwy5B94C7raWEouzlRhVdXAPRSbmnLeEqYUV27r6YhxkFlxe/pub?gid=219828157&single=true&output=csv&t=' + Date.now();
+
+  // Icon mapping per TEMUAN (kolom C)
+  const ICONS = {
+    'TRAFO REMBES':       'https://cdn-icons-png.flaticon.com/512/649/649813.png',
+    'TIANG KEROPOS':      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLU2sAmgTgX686SbaSxNZ-6Oy8DrXxvK_c6en5gn-T-A&s=10',
+    'BRACE KEROPOS':      'https://lytepoles.com/wp-content/uploads/2019/12/rmbracketforwood.png',
+    'PHBTR KEROPOS':      'https://png.pngtree.com/png-vector/20221007/ourmid/pngtree-electrical-box-panel-png-image_6290737.png',
+    'KONSTRUKSI GARDU':        'https://png.pngtree.com/png-clipart/20230930/original/pngtree-electric-pole-icon-single-background-illustration-vector-png-image_12913984.png',
+    'KONSTRUKSI GARDU MIRING': 'https://png.pngtree.com/png-clipart/20230930/original/pngtree-electric-pole-icon-single-background-illustration-vector-png-image_12913984.png',
+    'KONTRUKSI GARDU MIRING':  'https://png.pngtree.com/png-clipart/20230930/original/pngtree-electric-pole-icon-single-background-illustration-vector-png-image_12913984.png',
+    'KONTRUKSI GARDU':         'https://png.pngtree.com/png-clipart/20230930/original/pngtree-electric-pole-icon-single-background-illustration-vector-png-image_12913984.png',
+  };
+
+  const DOT_COLORS = {
+    'TIANG MIRING':       '#f97316',
+    'TIANG DRUG KEROPOS': '#8b5cf6',
+    'ISOLATOR PECAH':     '#f59e0b',
+    'ANDONGAN RENDAH':    '#10b981',
+    'TRAVES MIRING':      '#06b6d4',
+    'TRAVES KEROPOS':     '#0ea5e9',
+    'OPSTIK TERKUPAS':    '#ec4899',
+  };
+
+  const BADGE_COLORS = {
+    'TRAFO REMBES':            '#06b6d4',
+    'TIANG KEROPOS':           '#ef4444',
+    'TIANG MIRING':            '#f97316',
+    'TIANG DRUG KEROPOS':      '#8b5cf6',
+    'BRACE KEROPOS':           '#f97316',
+    'PHBTR KEROPOS':           '#f59e0b',
+    'KONSTRUKSI GARDU':        '#3b82f6',
+    'KONSTRUKSI GARDU MIRING': '#3b82f6',
+    'KONTRUKSI GARDU MIRING':  '#3b82f6',
+    'KONTRUKSI GARDU':         '#3b82f6',
+    'ISOLATOR PECAH':          '#eab308',
+    'ANDONGAN RENDAH':         '#10b981',
+    'TRAVES MIRING':           '#06b6d4',
+    'TRAVES KEROPOS':          '#0ea5e9',
+    'OPSTIK TERKUPAS':         '#ec4899',
+  };
+
+  // ====================== DATA ======================
+  let allData = [];
+  let filteredData = [];
+  let map, markersLayer;
+
+  // ====================== PARSE CSV ======================
+  function parseCSV(text) {
+    const lines = text.split('\n').filter(l => l.trim());
+    const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+      const vals = splitCSVLine(lines[i]);
+      if (vals.length < 2) continue;
+      const obj = {};
+      headers.forEach((h, idx) => { obj[h] = (vals[idx] || '').replace(/"/g, '').trim(); });
+      // Skip baris kosong (kolom B ULP dan C TEMUAN keduanya kosong)
+      if (!obj[headers[1]] && !obj[headers[2]]) continue;
+      rows.push(obj);
+    }
+    return { headers, rows };
+  }
+
+  function splitCSVLine(line) {
+    const result = []; let cur = ''; let inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
+      else { cur += c; }
+    }
+    result.push(cur);
+    return result;
+  }
+
+  function parseCoord(val) {
+    if (!val) return NaN;
+    let v = String(val).replace(/['"]/g, '').trim();
+    // Jika format pakai koma sebagai desimal (misal: 109,203467) tanpa titik → ganti koma ke titik
+    // Jika sudah pakai titik desimal (misal: 109.203467) → langsung parse
+    // Deteksi: kalau ada titik → sudah format desimal standar
+    if (!v.includes('.') && v.includes(',')) {
+      v = v.replace(',', '.');
+    }
+    // Hapus koma yang tersisa (pemisah ribuan)
+    v = v.replace(/,/g, '');
+    return parseFloat(v);
+  }
+  function initMap() {
+    map = L.map('map', { zoomControl: true }).setView([1.3, 109.3], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors', maxZoom: 19
+    }).addTo(map);
+    markersLayer = L.layerGroup().addTo(map);
+  }
+
+  function getIcon(temuan) {
+    const key = (temuan || '').toUpperCase();
+    const imgUrl = ICONS[key];
+    if (imgUrl) {
+      return L.icon({ iconUrl: imgUrl, iconSize: [36, 36], iconAnchor: [18, 36], popupAnchor: [0, -36] });
+    }
+    const color = DOT_COLORS[key] || '#94a3b8';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
+      <path d="M14 0C6.27 0 0 6.27 0 14c0 9.75 14 22 14 22S28 23.75 28 14C28 6.27 21.73 0 14 0z" fill="${color}"/>
+      <circle cx="14" cy="14" r="6" fill="white" opacity="0.9"/>
+    </svg>`;
+    return L.divIcon({
+      html: `<img src="data:image/svg+xml;base64,${btoa(svg)}" width="28" height="36">`,
+      iconSize: [28, 36], iconAnchor: [14, 36], popupAnchor: [0, -36],
+      className: ''
+    });
+  }
+
+  function buildPopup(row, headers) {
+    const temuan   = row['TEMUAN']          || row[headers[2]]  || '-';  // Kolom C
+    const pekerjaan= row['PEKERJAAN']       || row[headers[7]]  || '-';  // Kolom H
+    const kategori = row['KATEGORI']        || row[headers[9]]  || '-';  // Kolom J
+    const jTM      = row['JENIS TIANG TM']  || row[headers[10]] || '-';  // Kolom K
+    const jTR      = row['JENIS TIANG TR']  || row[headers[11]] || '-';  // Kolom L
+    const link     = row['EVIDENCE']        || row[headers[13]] || row[headers[14]] || '';
+    const lokasi   = row['LOKASI']          || row[headers[4]]  || '-';  // Kolom E
+    const penyulang= row['PENYULANG']       || row[headers[3]]  || '-';  // Kolom D
+
+    const evidenceBtn = link
+      ? `<div class="popup-evidence"><a href="${link}" target="_blank"><i class="fa-solid fa-image"></i> Lihat Evidence</a></div>`
+      : '';
+
+    return `
+      <div style="min-width:220px; max-width:280px;">
+        <div class="popup-title"><i class="fa-solid fa-map-pin me-1"></i>${lokasi}</div>
+        <div class="popup-row"><span class="popup-label">Temuan</span><span class="popup-val">${temuan}</span></div>
+        <div class="popup-row"><span class="popup-label">Pekerjaan</span><span class="popup-val">${pekerjaan}</span></div>
+        <div class="popup-row"><span class="popup-label">Penyulang</span><span class="popup-val">${penyulang}</span></div>
+        <div class="popup-row"><span class="popup-label">Kategori</span><span class="popup-val">${kategori}</span></div>
+        <div class="popup-row"><span class="popup-label">Jenis TM</span><span class="popup-val">${jTM}</span></div>
+        <div class="popup-row"><span class="popup-label">Jenis TR</span><span class="popup-val">${jTR}</span></div>
+        ${evidenceBtn}
+      </div>
+    `;
+  }
+
+  function renderMarkers(rows, headers) {
+    markersLayer.clearLayers();
+    let bounds = [];
+    rows.forEach(row => {
+      const lat = parseCoord(row['LATITUDE (Y)'] || row[headers[6]]);
+      const lng = parseCoord(row['LONGITUDE (X)'] || row[headers[5]]);
+      if (isNaN(lat) || isNaN(lng)) return;
+
+      const temuan = row[headers[2]] || '';
+      const icon = getIcon(temuan);
+      const marker = L.marker([lat, lng], { icon });
+      marker.bindPopup(buildPopup(row, headers), { maxWidth: 300 });
+      markersLayer.addLayer(marker);
+      bounds.push([lat, lng]);
+    });
+    if (bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
+  }
+
+  // ====================== TABLE ======================
+  function renderTable(rows, headers) {
+    const tbody = document.getElementById('tabelTemuan');
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--text-secondary);padding:24px;">Tidak ada data ditemukan</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map((row, i) => {
+      const no       = row['NO']            || row[headers[0]]  || (i + 1);
+      const ulp      = row['ULP']           || row[headers[1]]  || '-';
+      const temuan   = row['TEMUAN']        || row[headers[2]]  || '-';
+      const penyulang= row['PENYULANG']     || row[headers[3]]  || '-';
+      const lokasi   = row['LOKASI']        || row[headers[4]]  || '-';
+      const kategori = row['KATEGORI']      || row[headers[9]]  || '-';
+      const jTM      = row['JENIS TIANG TM']|| row[headers[10]] || '-';
+      const jTR      = row['JENIS TIANG TR']|| row[headers[11]] || '-';
+      const link     = row['EVIDENCE']      || row[headers[13]] || row[headers[14]] || '';
+      const color    = BADGE_COLORS[(temuan).toUpperCase()] || '#64748b';
+      const evidence = link
+        ? `<a href="${link}" target="_blank" style="color:#3b82f6;"><i class="fa-solid fa-link"></i></a>`
+        : '-';
+
+      return `<tr onclick="setActiveRow(this); zoomToRow(${row.__idx})">
+        <td>${no}</td>
+        <td>${ulp}</td>
+        <td>${temuan}</td>
+        <td>${penyulang}</td>
+        <td>${lokasi}</td>
+        <td><span class="badge-kategori" style="background:${color}22;color:${color};border:1px solid ${color}44;">${kategori}</span></td>
+        <td>${jTM}</td>
+        <td>${jTR}</td>
+        <td>${evidence}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ====================== FILTER ======================
+  function applyFilter() {
+    const kat  = document.getElementById('filterKategori').value.toUpperCase();
+    const pen  = document.getElementById('filterPenyulang').value.toUpperCase();
+    const cari = document.getElementById('searchInput').value.toLowerCase();
+
+    filteredData = allData.filter(row => {
+      const kategori  = (row.row['KATEGORI'] || '').toUpperCase();
+      const penyulang = (row.row['PENYULANG'] || row.row[row.headers[3]] || '').toUpperCase();
+      const temuan    = (row.row[row.headers[2]] || '').toLowerCase();
+      const lokasi    = (row.row['LOKASI'] || '').toLowerCase();
+
+      return (!kat || kategori.includes(kat))
+          && (!pen || penyulang.includes(pen))
+          && (!cari || temuan.includes(cari) || lokasi.includes(cari));
+    });
+
+    document.getElementById('filterInfo').textContent = `Menampilkan ${filteredData.length} dari ${allData.length} data`;
+    renderMarkers(filteredData.map(d => d.row), filteredData[0]?.headers || []);
+    renderTable(filteredData.map(d => d.row), filteredData[0]?.headers || []);
+  }
+
+  function resetFilter() {
+    document.getElementById('filterKategori').value = '';
+    document.getElementById('filterPenyulang').value = '';
+    document.getElementById('searchInput').value = '';
+    applyFilter();
+  }
+
+  function zoomToRow(idx) {
+    const item = allData.find(d => d.row.__idx === idx);
+    if (!item) return;
+
+    const lat = parseCoord(item.row['LATITUDE (Y)']);
+    const lng = parseCoord(item.row['LONGITUDE (X)']);
+
+    if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+      map.setView([lat, lng], 17);
+      // Cari marker yang sesuai dan buka popupnya
+      markersLayer.eachLayer(layer => {
+        const latlng = layer.getLatLng();
+        if (Math.abs(latlng.lat - lat) < 0.001 && Math.abs(latlng.lng - lng) < 0.001) {
+          setTimeout(() => layer.openPopup(), 300);
+        }
+      });
+      // Scroll ke peta
+      document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      // Tidak ada koordinat — tetap scroll ke peta dan beri notifikasi
+      document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showToast('Titik koordinat tidak tersedia untuk data ini', 'warning');
+    }
+  }
+
+  // ====================== POPULATE FILTER OPTIONS ======================
+  function populateFilters(rows, headers) {
+    const kategoriSet = new Set();
+    const penyulangSet = new Set();
+    rows.forEach(row => {
+      const k = row['KATEGORI'] || row[headers[9]];
+      const p = row['PENYULANG'] || row[headers[3]];
+      if (k) kategoriSet.add(k.trim());
+      if (p) penyulangSet.add(p.trim());
+    });
+
+    const selKat = document.getElementById('filterKategori');
+    const selPen = document.getElementById('filterPenyulang');
+    [...kategoriSet].sort().forEach(k => {
+      selKat.innerHTML += `<option value="${k}">${k}</option>`;
+    });
+    [...penyulangSet].sort().forEach(p => {
+      selPen.innerHTML += `<option value="${p}">${p}</option>`;
+    });
+  }
+
+  // ====================== STAT CARDS ======================
+  function updateStats(rows, headers) {
+    const total = rows.length;
+    let tiang = 0, phbtr = 0, lainnya = 0;
+    rows.forEach(row => {
+      const k = (row['KATEGORI'] || row[headers[9]] || '').toUpperCase();
+      if (k.includes('TIANG')) tiang++;
+      else if (k.includes('PHBTR')) phbtr++;
+      else lainnya++;
+    });
+    document.getElementById('totalTemuan').textContent = total;
+    document.getElementById('totalTiang').textContent = tiang;
+    document.getElementById('totalPHBTR').textContent = phbtr;
+    document.getElementById('totalLainnya').textContent = lainnya;
+  }
+
+  // ====================== MAIN LOAD ======================
+  async function loadData() {
+    try {
+      const resp = await fetch(SHEET_URL);
+      if (!resp.ok) throw new Error('Gagal fetch');
+      const text = await resp.text();
+      const { headers, rows } = parseCSV(text);
+
+      // Tag index
+      rows.forEach((r, i) => { r.__idx = i; });
+
+      allData = rows.map(row => ({ row, headers }));
+      filteredData = [...allData];
+
+      populateFilters(rows, headers);
+      updateStats(rows, headers);
+      renderMarkers(rows, headers);
+      renderTable(rows, headers);
+      document.getElementById('filterInfo').textContent = `Menampilkan ${rows.length} dari ${rows.length} data`;
+    } catch (err) {
+      console.error(err);
+      document.getElementById('tabelTemuan').innerHTML =
+        `<tr><td colspan="9" style="text-align:center;color:#ef4444;padding:24px;"><i class="fa-solid fa-triangle-exclamation me-2"></i>Gagal memuat data. Pastikan sheet sudah dipublish.</td></tr>`;
+    } finally {
+      document.getElementById('loadingOverlay').style.display = 'none';
+    }
+  }
+
+  // ====================== DATETIME ======================
+  function updateDateTime() {
+    const now = new Date();
+    const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    document.getElementById('dateText').textContent =
+      `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    document.getElementById('timeText').textContent =
+      now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+
+  // ====================== THEME ======================
+  const themeBtn = document.getElementById('themeToggleBtn');
+  const themeIcon = document.getElementById('themeIcon');
+  let lightMode = localStorage.getItem('theme') === 'light';
+  if (lightMode) { document.body.classList.add('light-mode'); themeIcon.className = 'fa-solid fa-sun'; }
+  themeBtn.addEventListener('click', () => {
+    lightMode = !lightMode;
+    document.body.classList.toggle('light-mode', lightMode);
+    themeIcon.className = lightMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    localStorage.setItem('theme', lightMode ? 'light' : 'dark');
+  });
+
+  // ====================== SIDEBAR ======================
+  const sidebar = document.getElementById('sidebar');
+  const mainContent = document.getElementById('mainContent');
+  const collapseBtn = document.getElementById('collapseBtn');
+  const collapseIcon = document.getElementById('collapseIcon');
+  let collapsed = false;
+
+  collapseBtn.addEventListener('click', () => {
+    collapsed = !collapsed;
+    sidebar.classList.toggle('collapsed', collapsed);
+    mainContent.classList.toggle('expanded', collapsed);
+    collapseIcon.className = collapsed ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left';
+    setTimeout(() => map.invalidateSize(), 300);
+  });
+
+  document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+    sidebar.classList.toggle('mobile-open');
+  });
+
+  // ====================== ACTIVE ROW ======================
+  function setActiveRow(el) {
+    document.querySelectorAll('#tabelTemuan tr').forEach(tr => tr.classList.remove('active-row'));
+    el.classList.add('active-row');
+  }
+
+  // ====================== TOAST ======================
+  function showToast(msg, type = 'info') {
+    let toast = document.getElementById('toastMsg');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'toastMsg';
+      toast.style.cssText = 'position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:12px;font-size:0.85rem;z-index:9999;transition:opacity 0.3s;box-shadow:0 8px 24px rgba(0,0,0,0.3);';
+      document.body.appendChild(toast);
+    }
+    const colors = { info: '#3b82f6', success: '#10b981', warning: '#f59e0b', error: '#ef4444' };
+    toast.style.background = colors[type] || colors.info;
+    toast.style.color = 'white';
+    toast.style.opacity = '1';
+    toast.textContent = msg;
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
+  }
+
+  // ====================== SORT TABLE ======================
+  let sortColIdx = -1;
+  let sortAsc = true;
+
+  function sortTable(colIdx) {
+    // Update header classes
+    document.querySelectorAll('#mainTable thead th').forEach((th, i) => {
+      th.classList.remove('sort-asc', 'sort-desc');
+      const icon = th.querySelector('.sort-icon');
+      if (icon) icon.textContent = '⇅';
+    });
+
+    if (sortColIdx === colIdx) {
+      sortAsc = !sortAsc;
+    } else {
+      sortColIdx = colIdx;
+      sortAsc = true;
+    }
+
+    const th = document.querySelectorAll('#mainTable thead th')[colIdx];
+    th.classList.add(sortAsc ? 'sort-asc' : 'sort-desc');
+    const icon = th.querySelector('.sort-icon');
+    if (icon) icon.textContent = '';
+
+    filteredData.sort((a, b) => {
+      const headers = a.headers;
+      const cols = [headers[0], headers[1], headers[2], headers[3], headers[4], headers[9], headers[10], headers[11]];
+      const key = cols[colIdx] || headers[colIdx];
+      const va = (a.row[key] || '').toString().toLowerCase();
+      const vb = (b.row[key] || '').toString().toLowerCase();
+      // Coba sort numerik
+      const na = parseFloat(va), nb = parseFloat(vb);
+      if (!isNaN(na) && !isNaN(nb)) return sortAsc ? na - nb : nb - na;
+      return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+    });
+
+    renderTable(filteredData.map(d => d.row), filteredData[0]?.headers || []);
+  }
+
+  // ====================== DOWNLOAD EXCEL ======================
+  function downloadExcel() {
+    if (!filteredData.length) return;
+    const headers = filteredData[0].headers;
+
+    const wsData = [
+      ['NO', 'ULP', 'TEMUAN', 'PENYULANG', 'LOKASI', 'KATEGORI', 'JENIS TIANG TM', 'JENIS TIANG TR', 'EVIDENCE']
+    ];
+
+    filteredData.forEach((d, i) => {
+      const row = d.row;
+      wsData.push([
+        row['NO']             || row[headers[0]]  || (i + 1),
+        row['ULP']            || row[headers[1]]  || '',
+        row['TEMUAN']         || row[headers[2]]  || '',
+        row['PENYULANG']      || row[headers[3]]  || '',
+        row['LOKASI']         || row[headers[4]]  || '',
+        row['KATEGORI']       || row[headers[9]]  || '',
+        row['JENIS TIANG TM'] || row[headers[10]] || '',
+        row['JENIS TIANG TR'] || row[headers[11]] || '',
+        row['EVIDENCE']       || row[headers[13]] || row[headers[14]] || '',
+      ]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    // Auto column width
+    ws['!cols'] = [6, 10, 20, 12, 20, 16, 14, 10, 40].map(w => ({ wch: w }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Temuan Inspeksi');
+    XLSX.writeFile(wb, 'Temuan_Inspeksi_ULP_Sekura.xlsx');
+  }
+
+  // ====================== INIT ======================
+  initMap();
+  loadData();
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+</script>
+</body>
+</html>
