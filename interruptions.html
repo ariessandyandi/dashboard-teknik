@@ -870,6 +870,12 @@ function parseCSVRows(text){
   return text.split('\n').filter(l=>l.length).map(l=> splitCSVLine(l).map(c=> c.replace(/^"|"$/g,'').trim()));
 }
 
+// data sheet sering ditulis HURUF BESAR (CERAH, HUJAN, SUBUH...), normalisasi ke Title Case
+// supaya cocok dengan label di UI ("Cerah", "Hujan", "Subuh", dst)
+function toTitleCase(str){
+  return (str || '').toLowerCase().replace(/\b\w/g, c=> c.toUpperCase());
+}
+
 async function loadTripLogFromSheet(){
   try{
     const resp = await fetch(LOG_CSV_URL + '&t=' + Date.now());
@@ -925,8 +931,8 @@ async function loadTripLogFromSheet(){
         normal: row[col.normal] || '',
         temuan: row[col.temuan] || '',
         kategoriPenyebab: col.kategoriPenyebab > -1 ? (row[col.kategoriPenyebab] || '') : '',
-        cuaca: row[col.cuaca] || '',
-        waktu: row[col.waktu] || '',
+        cuaca: toTitleCase(row[col.cuaca] || ''),
+        waktu: toTitleCase(row[col.waktu] || ''),
         evidence: row[col.evidence] || ''
       });
     }
