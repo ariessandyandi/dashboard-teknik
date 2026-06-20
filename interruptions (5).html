@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Interruptions | PLN ULP Sekura</title>
+<title>Gangguan | PLN ULP Sekura</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     /* ===== ENERGY PULSE PALETTE (LIGHT MODE / DEFAULT) ===== */
-    --bg-deep:#140b2e;
-    --bg-deep-2:#1d1147;
+    --bg-deep:#0f172a;
+    --bg-deep-2:#111827;
     --surface:#ffffff;
     --surface-soft:#f8f7ff;
 
-    --violet:#7c3aed;
-    --violet-soft:#a78bfa;
-    --pink:#ec4899;
-    --magenta:#d946ef;
+    --violet:#3b82f6;
+    --violet-soft:#60a5fa;
+    --pink:#2563eb;
+    --magenta:#1d4ed8;
 
     --cyan:#22d3ee;
     --teal:#06b6d4;
@@ -26,40 +26,40 @@
     --orange:#fb923c;
     --amber:#fbbf24;
 
-    --ink:#1b1133;
-    --ink-soft:#6b6489;
-    --ink-faint:#a8a3c4;
-    --hairline:#ece9fb;
+    --ink:#0f172a;
+    --ink-soft:#475569;
+    --ink-faint:#94a3b8;
+    --hairline:#e2e8f0;
 
     --r-lg:20px;
     --r-md:14px;
     --r-sm:10px;
 
-    --shadow-card:0 2px 8px rgba(76,29,149,.06), 0 16px 40px -16px rgba(76,29,149,.18);
-    --shadow-pop:0 10px 30px -8px rgba(124,58,237,.45);
+    --shadow-card:0 2px 8px rgba(15,23,42,.06), 0 16px 40px -16px rgba(15,23,42,.16);
+    --shadow-pop:0 10px 30px -8px rgba(59,130,246,.45);
 
-    --body-bg-1: radial-gradient(1100px 600px at 100% -10%, #2a1a5e 0%, transparent 60%);
-    --body-bg-2: radial-gradient(900px 500px at -10% 100%, #1a3a5e 0%, transparent 55%);
-    --body-bg-base: #1d1147;
+    --body-bg-1: radial-gradient(1100px 600px at 100% -10%, #1e3a5f 0%, transparent 60%);
+    --body-bg-2: radial-gradient(900px 500px at -10% 100%, #15233b 0%, transparent 55%);
+    --body-bg-base: #111827;
 
-    --sidebar-bg: linear-gradient(165deg,#1d1147 0%, #140b2e 55%, #0e0726 100%);
+    --sidebar-bg: linear-gradient(165deg,#1e293b 0%, #111827 55%, #0a0e1a 100%);
   }
 
   [data-theme="dark"]{
-    --surface:#1a1530;
-    --surface-soft:#211c3d;
-    --ink:#f1eefc;
-    --ink-soft:#b8b0d9;
-    --ink-faint:#766fa0;
-    --hairline:#352c5c;
+    --surface:#1e293b;
+    --surface-soft:#273449;
+    --ink:#f1f5f9;
+    --ink-soft:#cbd5e1;
+    --ink-faint:#94a3b8;
+    --hairline:#334155;
 
     --shadow-card:0 2px 8px rgba(0,0,0,.25), 0 16px 40px -16px rgba(0,0,0,.5);
 
-    --body-bg-1: radial-gradient(1100px 600px at 100% -10%, #1c1140 0%, transparent 60%);
+    --body-bg-1: radial-gradient(1100px 600px at 100% -10%, #16243d 0%, transparent 60%);
     --body-bg-2: radial-gradient(900px 500px at -10% 100%, #0f1f38 0%, transparent 55%);
-    --body-bg-base: #0a0718;
+    --body-bg-base: #0f172a;
 
-    --sidebar-bg: linear-gradient(165deg,#120c28 0%, #0a0718 55%, #050310 100%);
+    --sidebar-bg: linear-gradient(165deg,#111827 0%, #0a0e1a 55%, #05070d 100%);
   }
   *{box-sizing:border-box;}
   body{
@@ -92,7 +92,7 @@
   .sidebar::after{
     content:"";
     position:absolute; top:0; right:0; bottom:0; width:1px;
-    background:linear-gradient(180deg, rgba(124,58,237,.5), rgba(236,72,153,.2), transparent);
+    background:linear-gradient(180deg, rgba(59,130,246,.5), rgba(37,99,235,.2), transparent);
   }
   .sb-brand{
     display:flex; align-items:center; gap:11px;
@@ -103,7 +103,7 @@
     background:linear-gradient(135deg,var(--violet),var(--pink));
     display:flex;align-items:center;justify-content:center;
     font-weight:800;color:#fff;font-size:13px;
-    box-shadow:0 6px 16px -4px rgba(236,72,153,.55);
+    box-shadow:0 6px 16px -4px rgba(37,99,235,.55);
     font-family:"Space Grotesk",sans-serif;
   }
   .sb-brand .name{font-size:14px;font-weight:700;color:#fff;line-height:1.25;}
@@ -123,9 +123,9 @@
   .sb-link svg{width:17px;height:17px;flex-shrink:0;opacity:.8;}
   .sb-link:hover{ background:rgba(255,255,255,.06); color:#fff; }
   .sb-link.active{
-    background:linear-gradient(90deg, rgba(124,58,237,.35), rgba(236,72,153,.12));
+    background:linear-gradient(90deg, rgba(59,130,246,.35), rgba(37,99,235,.12));
     color:#fff; font-weight:700;
-    box-shadow: inset 0 0 0 1px rgba(167,139,250,.3);
+    box-shadow: inset 0 0 0 1px rgba(96,165,250,.3);
   }
   .sb-link.active svg{ opacity:1; color:var(--cyan);}
   .sb-link.sub.active{ background:rgba(34,211,238,.12); box-shadow:inset 0 0 0 1px rgba(34,211,238,.35);}
@@ -175,9 +175,9 @@
 
   /* ---- FILTER BAR ---- */
   .filterbar{
-    background:linear-gradient(120deg, #2a1a5e 0%, #3b2278 50%, #4a1f5e 100%);
+    background:linear-gradient(120deg, #0f172a 0%, #1e3a5f 50%, #1e293b 100%);
     border-radius:var(--r-lg);
-    box-shadow:0 10px 30px -10px rgba(124,58,237,.35);
+    box-shadow:0 10px 30px -10px rgba(15,23,42,.35);
     padding:18px 22px;
     display:flex; flex-wrap:wrap; gap:22px; align-items:flex-end;
     margin-bottom:20px;
@@ -196,7 +196,7 @@
     white-space:nowrap; transition:all .15s;
   }
   .seg button:hover:not(.active){ color:var(--ink); }
-  .seg.cat button.active.all{ background:linear-gradient(135deg,#3b3160,#1b1133); color:#fff; }
+  .seg.cat button.active.all{ background:linear-gradient(135deg,#1e293b,#0f172a); color:#fff; }
   .seg.cat button.active.lt5{ background:linear-gradient(135deg,var(--teal),var(--cyan)); color:#06303b; box-shadow:0 4px 14px -4px rgba(6,182,212,.55);}
   .seg.cat button.active.gt5{ background:linear-gradient(135deg,#f43f5e,var(--orange)); color:#fff; box-shadow:0 4px 14px -4px rgba(244,63,94,.55);}
 
@@ -216,11 +216,11 @@
   }
   .filterbar select.dd option{ color:#1b1133; }
 
-  .month-row{ display:flex; flex-wrap:wrap; gap:6px; max-width:600px; position:relative; z-index:1; }
+  .month-row{ display:flex; flex-wrap:nowrap; gap:5px; position:relative; z-index:1; }
   .month-row button{
     border:1.5px solid rgba(255,255,255,.18); background:rgba(255,255,255,.08); color:rgba(255,255,255,.75);
-    font-size:11.5px; font-weight:700; padding:7px 11px; border-radius:9px; cursor:pointer;
-    transition:all .15s;
+    font-size:11.5px; font-weight:700; padding:7px 9px; border-radius:9px; cursor:pointer;
+    transition:all .15s; flex-shrink:0;
   }
   .month-row button.active{
     background:#fff; color:#1b1133; border-color:transparent;
@@ -239,12 +239,12 @@
   .pill:hover:not(.active){ border-color:var(--violet-soft); color:var(--violet); }
   /* weather pills */
   .pill[data-weather].active{ color:#fff; border-color:transparent; }
-  .pill[data-weather="all"].active{ background:linear-gradient(135deg,#3b3160,#1b1133); }
+  .pill[data-weather="all"].active{ background:linear-gradient(135deg,#1e293b,#0f172a); }
   .pill[data-weather="Cerah"].active{ background:linear-gradient(135deg,var(--amber),var(--orange)); box-shadow:0 4px 12px -4px rgba(251,146,60,.55); }
   .pill[data-weather="Hujan"].active{ background:linear-gradient(135deg,#3b82f6,#1d5fb8); box-shadow:0 4px 12px -4px rgba(59,130,246,.55); }
   /* time-of-day pills */
   .pill[data-waktu].active{ color:#fff; border-color:transparent; }
-  .pill[data-waktu="all"].active{ background:linear-gradient(135deg,#3b3160,#1b1133); }
+  .pill[data-waktu="all"].active{ background:linear-gradient(135deg,#1e293b,#0f172a); }
   .pill[data-waktu="Subuh"].active{ background:linear-gradient(135deg,#6366f1,#4338ca); box-shadow:0 4px 12px -4px rgba(99,102,241,.55); }
   .pill[data-waktu="Pagi"].active{ background:linear-gradient(135deg,#fbbf24,#f59e0b); box-shadow:0 4px 12px -4px rgba(251,191,36,.55); }
   .pill[data-waktu="Siang"].active{ background:linear-gradient(135deg,#22d3ee,#06b6d4); box-shadow:0 4px 12px -4px rgba(34,211,238,.55); }
@@ -271,10 +271,10 @@
     content:""; position:absolute; right:20px; bottom:-40px; width:90px; height:90px;
     border-radius:50%; background:rgba(255,255,255,.08);
   }
-  .kpi.total{ background:linear-gradient(140deg,#6d28d9,#a21caf 60%,#ec4899); }
+  .kpi.total{ background:linear-gradient(140deg,#1d4ed8,#2563eb 60%,#3b82f6); }
   .kpi.lt5{ background:linear-gradient(140deg,#0e7490,#0891b2 55%,#22d3ee); }
   .kpi.gt5{ background:linear-gradient(140deg,#9d174d,#e11d48 55%,#fb923c); }
-  .kpi.yoy{ background:linear-gradient(140deg,#312e81,#4338ca 55%,#7c3aed); }
+  .kpi.yoy{ background:linear-gradient(140deg,#1e3a8a,#1d4ed8 55%,#3b82f6); }
 
   .kpi .label{ font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; opacity:.85; position:relative; z-index:1;}
   .kpi .value-row{ display:flex; align-items:baseline; gap:6px; margin:8px 0 4px; position:relative; z-index:1;}
@@ -415,9 +415,17 @@
 
   .empty-state{ text-align:center; padding:34px 10px; color:var(--ink-faint); font-size:13px;}
 
+  /* ---- RINCIAN PENYEBAB (root cause bar list) ---- */
+  .rc-row{ display:flex; align-items:center; gap:12px; margin-bottom:11px; }
+  .rc-label{ width:170px; flex-shrink:0; font-size:12px; font-weight:700; color:var(--ink); text-align:right; }
+  .rc-track{ flex:1; height:16px; background:var(--surface-soft); border-radius:8px; overflow:hidden; box-shadow:inset 0 0 0 1px var(--hairline); }
+  .rc-fill{ height:100%; border-radius:8px; transition:width .4s ease; }
+  .rc-val{ width:26px; flex-shrink:0; font-size:12.5px; font-weight:800; color:var(--ink); }
+
   @media (max-width:980px){
     .grid-2{ grid-template-columns:1fr; }
     .sidebar{ display:none; }
+    .month-row{ flex-wrap:wrap; }
   }
   @media (max-width:680px){
     .kpi-grid{ grid-template-columns:1fr; }
@@ -443,16 +451,11 @@
 
     <a class="sb-link active" href="interruptions.html">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7l-1 8 11-12h-7l1-8z"/></svg>
-      Interruptions
+      Gangguan
     </a>
 
     <a class="sb-link" href="temuan-inspeksi.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Temuan Inspeksi</a>
     <a class="sb-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Reports</a>
-
-    <div class="sb-section-label">Sub-menu Interruptions</div>
-    <a class="sb-link sub active" href="#trend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 3 5-6"/></svg>Trend Bulanan</a>
-    <a class="sb-link sub" href="#keypoint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>Per Keypoint</a>
-    <a class="sb-link sub" href="#log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Log Kejadian</a>
 
     <div class="sb-foot">RAW DASHBOARD ARIES<br>Update terakhir: Jun 2026</div>
   </aside>
@@ -462,7 +465,7 @@
 
     <div class="topbar">
       <div>
-        <h1>⚡ Interruptions</h1>
+        <h1>⚡ Gangguan</h1>
         <p>Rekap gangguan jaringan</p>
       </div>
       <div class="topbar-right">
@@ -516,7 +519,7 @@
     <!-- ===== KPI ===== -->
     <div class="kpi-grid">
       <div class="kpi total">
-        <div class="label">Total Interruptions</div>
+        <div class="label">Total Gangguan</div>
         <div class="value-row"><span class="value" id="kpiTotal">0</span><span class="unit">kali</span></div>
         <div class="sub" id="kpiTotalSub">Tahun terpilih · semua kategori</div>
         <svg class="spark" id="sparkTotal" viewBox="0 0 88 34" preserveAspectRatio="none"></svg>
@@ -562,7 +565,7 @@
     <!-- ===== PENYEBAB: INTERNAL VS EKSTERNAL ===== -->
     <div class="panel-full" id="penyebab">
       <div class="ph">
-        <h2>🔧 Penyebab Gangguan</h2>
+        <h2>🔧 Partisipasi Penyebab Gangguan</h2>
         <div style="display:flex; align-items:center; gap:8px;">
           <select id="causeMonthFilter" class="dd">
             <option value="-1">Semua Bulan</option>
@@ -581,7 +584,7 @@
           </select>
         </div>
       </div>
-      <p class="split-hint" style="text-align:left; padding:0; margin:-4px 0 12px;">Total interruption dipecah menjadi penyebab Internal Unit (gangguan dari sisi jaringan/aset sendiri) dan External Unit (gangguan dari luar, mis. pohon, layangan, layangan pihak ketiga).</p>
+      <p class="split-hint" style="text-align:left; padding:0; margin:-4px 0 12px;">Total gangguan dipecah berdasarkan penyebabnya (dari kolom TEMUAN log kejadian): Internal Unit (gangguan dari sisi jaringan/aset sendiri) dan External Unit (gangguan dari luar, mis. pohon, layangan, binatang).</p>
       <div class="chart-wrap"><div id="causeChart" class="svg-chart"></div></div>
       <div class="cause-summary">
         <div class="cs-item">
@@ -589,7 +592,7 @@
           <div class="cs-value" id="causeTotalVal">0</div>
         </div>
         <div class="cs-item">
-          <div class="cs-label"><span class="legend-sq" style="background:#7c3aed"></span>Internal Unit</div>
+          <div class="cs-label"><span class="legend-sq" style="background:#3b82f6"></span>Internal Unit</div>
           <div class="cs-value" id="causeInternalVal">0</div>
         </div>
         <div class="cs-item">
@@ -599,11 +602,20 @@
       </div>
     </div>
 
+    <!-- ===== RINCIAN PENYEBAB GANGGUAN (root cause detail) ===== -->
+    <div class="panel-full" id="rincian-penyebab">
+      <div class="ph">
+        <h2>📊 Rincian Penyebab Gangguan</h2>
+        <span class="tag" id="rincianPenyebabTag">Berdasarkan log kejadian</span>
+      </div>
+      <p class="split-hint" style="text-align:left; padding:0; margin:-4px 0 16px;">Akar penyebab per kategori (dari kolom TEMUAN), diurutkan dari yang paling sering terjadi.</p>
+      <div id="rincianPenyebabList"></div>
+    </div>
+
     <!-- ===== WAKTU TRIP & CUACA (1 PANEL, KIRI-KANAN) ===== -->
     <div class="panel-full" id="waktu">
       <div class="ph">
         <h2>🕐🌦️ Waktu Trip &amp; Cuaca</h2>
-        <span class="tag" id="waktuCuacaTag">Berdasarkan log kejadian 2026</span>
       </div>
       <div class="local-filter-row">
         <div class="seg cat" id="waktuCatFilter">
@@ -672,7 +684,7 @@
         <h2>📋 Log Kejadian</h2>
         <span class="tag" id="logTag">Detail per trip</span>
       </div>
-      <p style="font-size:11.5px; color:var(--ink-faint); margin:-6px 0 12px;">Data trend &amp; rekap keypoint di panel lain adalah agregat bulanan dari sheet dan tidak memiliki rincian cuaca/waktu — rincian itu hanya tersedia di log kejadian ini (tahun 2026).</p>
+      <p style="font-size:11.5px; color:var(--ink-faint); margin:8px 0 14px;">Data trend &amp; rekap keypoint di panel lain adalah agregat bulanan dari sheet dan tidak memiliki rincian cuaca/waktu — rincian itu hanya tersedia di log kejadian ini (tahun 2026).</p>
       <div class="local-filter-row">
         <div class="seg cat" id="logCatFilter">
           <button data-cat="all" class="active all">All</button>
@@ -802,7 +814,7 @@ function causeTotals(cat, year){
 }
 
 
-const TRIP_LOG = [
+let TRIP_LOG = [
   { no:1, bulanIdx:0, keypoint:"RECLOSER SASAK ( TMJ )", durasi:1, tanggal:"07/01/2026", trip:"05:48", normal:"05:49", temuan:"Pohon tumbang, SUTM lepas dari isolator 1 phasa", cuaca:"Hujan", waktu:"Subuh" },
   { no:2, bulanIdx:0, keypoint:"RECLOSER PERIGI PARIT", durasi:41, tanggal:"08/01/2026", trip:"17:32", normal:"18:13", temuan:"Daun kelapa nempel ke isolator", cuaca:"Hujan", waktu:"Sore" },
   { no:3, bulanIdx:0, keypoint:"RECLOSER TANAH HITAM", durasi:1, tanggal:"13/01/2026", trip:"07:41", normal:"07:42", temuan:"Gangguan tidak jelas", cuaca:"Cerah", waktu:"Pagi" },
@@ -832,8 +844,234 @@ const TRIP_LOG = [
 ];
 
 // ============================================================
-// STATE
+// DATA LIVE DARI SPREADSHEET (Log Kejadian, kolom TEMUAN = "AP")
+// Kolom dicari berdasarkan NAMA HEADER, bukan posisi tetap,
+// supaya tetap aman walau urutan/posisi kolom di sheet berubah.
 // ============================================================
+const RAW_SHEET_PUB_ID = '2PACX-1vTxJWuRpxxFJUaRKp-VdalrXsnbaiD1hwy5B94C7raWEouzlRhVdXAPRSbmnLeEqYUV27r6YhxkFlxe';
+const LOG_SHEET_GID = '2107201497';
+const LOG_CSV_URL = `https://docs.google.com/spreadsheets/d/e/${RAW_SHEET_PUB_ID}/pub?gid=${LOG_SHEET_GID}&single=true&output=csv`;
+
+let USE_REAL_CAUSE_DATA = false;
+
+function splitCSVLine(line){
+  const result = []; let cur = ''; let inQ = false;
+  for(let i=0;i<line.length;i++){
+    const c = line[i];
+    if(c === '"'){ inQ = !inQ; }
+    else if(c === ',' && !inQ){ result.push(cur); cur = ''; }
+    else { cur += c; }
+  }
+  result.push(cur);
+  return result;
+}
+
+function parseCSVRows(text){
+  return text.split('\n').filter(l=>l.length).map(l=> splitCSVLine(l).map(c=> c.replace(/^"|"$/g,'').trim()));
+}
+
+async function loadTripLogFromSheet(){
+  try{
+    const resp = await fetch(LOG_CSV_URL + '&t=' + Date.now());
+    if(!resp.ok) throw new Error('Gagal fetch sheet gangguan (HTTP ' + resp.status + ')');
+    const text = await resp.text();
+    if(!text || text.trim().length < 10) throw new Error('Respons CSV kosong - cek sharing sheet (harus "Anyone with link: Viewer")');
+    const rows = parseCSVRows(text);
+
+    // cari baris header tabel Log Kejadian: baris yang punya kolom BULAN, KEYPOINT, dan TEMUAN sekaligus
+    let headerRowIdx = -1, col = {};
+    for(let r=0; r<Math.min(rows.length, 8); r++){
+      const row = rows[r].map(c=> c.toUpperCase());
+      const iTemuan = row.findIndex(c=> c === 'TEMUAN');
+      const iKeypoint = row.findIndex(c=> c === 'KEYPOINT');
+      const iBulan = row.findIndex(c=> c === 'BULAN');
+      if(iTemuan > -1 && iKeypoint > -1 && iBulan > -1){
+        headerRowIdx = r;
+        col = {
+          no: row.findIndex(c=> c === 'NO'),
+          bulan: iBulan,
+          keypoint: iKeypoint,
+          durasi: row.findIndex(c=> c.startsWith('DURASI')),
+          tanggal: row.findIndex(c=> c === 'TANGGAL'),
+          trip: row.findIndex(c=> c === 'TRIP'),
+          normal: row.findIndex(c=> c === 'NORMAL'),
+          temuan: iTemuan,
+          kategoriPenyebab: row.findIndex(c=> c === 'KATEGORI PENYEBAB'),
+          cuaca: row.findIndex(c=> c === 'CUACA'),
+          waktu: row.findIndex(c=> c.startsWith('WAKTU')),
+          evidence: row.findIndex(c=> c === 'EVIDENCE')
+        };
+        break;
+      }
+    }
+    if(headerRowIdx === -1) throw new Error('Header tabel Log Kejadian (kolom BULAN/KEYPOINT/TEMUAN) tidak ditemukan di sheet');
+
+    const monthIndex = name => MONTHS_FULL.findIndex(m=> m.toUpperCase() === (name||'').trim().toUpperCase());
+
+    const out = [];
+    for(let r=headerRowIdx+1; r<rows.length; r++){
+      const row = rows[r];
+      const bulanRaw = row[col.bulan] || '';
+      if(!bulanRaw) continue;
+      const bIdx = monthIndex(bulanRaw);
+      if(bIdx === -1) continue;
+      out.push({
+        no: parseInt(row[col.no]) || (out.length + 1),
+        bulanIdx: bIdx,
+        keypoint: row[col.keypoint] || '',
+        durasi: parseFloat((row[col.durasi]||'0').replace(',', '.')) || 0,
+        tanggal: row[col.tanggal] || '',
+        trip: row[col.trip] || '',
+        normal: row[col.normal] || '',
+        temuan: row[col.temuan] || '',
+        kategoriPenyebab: col.kategoriPenyebab > -1 ? (row[col.kategoriPenyebab] || '') : '',
+        cuaca: row[col.cuaca] || '',
+        waktu: row[col.waktu] || '',
+        evidence: row[col.evidence] || ''
+      });
+    }
+    console.log(`Log Kejadian: ${out.length} baris dimuat dari sheet (kolom KATEGORI PENYEBAB ${col.kategoriPenyebab > -1 ? 'ditemukan' : 'TIDAK ditemukan, fallback ke kata kunci TEMUAN'}).`);
+    return out;
+  }catch(err){
+    console.error('Gagal memuat Log Kejadian dari spreadsheet, pakai data contoh:', err);
+    return null;
+  }
+}
+
+// klasifikasi penyebab -> Internal / Eksternal (pakai KATEGORI PENYEBAB jika ada, fallback ke kata kunci TEMUAN)
+const CAUSE_KW_EXTERNAL = ['POHON','RANTING','DAUN','LAYANGAN','BINATANG','ULAR','TUPAI','BIAWAK','PETIR','ATAP','SENG','BENDA ASING','PIHAK','KENDARAAN','TERBANG'];
+const CAUSE_KW_INTERNAL = ['ISOLATOR','CLAMP','TRAVES','KABEL','KONDUKTOR','RANTAS','FUSE','FCO','ARRESTER','RECLOSER','TIANG','KONSTRUKSI','RELAY','RUSAK','RAPUH','JUMPER','ANDONGAN','PHBTR','TRAFO'];
+
+function classifyCause(item){
+  // prioritaskan kolom KATEGORI PENYEBAB kalau ada isinya, fallback ke kata kunci di TEMUAN
+  const label = ((item.kategoriPenyebab && item.kategoriPenyebab.trim()) || item.temuan || '').toUpperCase();
+  if(CAUSE_KW_EXTERNAL.some(k=> label.includes(k))) return 'external';
+  if(CAUSE_KW_INTERNAL.some(k=> label.includes(k))) return 'internal';
+  return 'external'; // penyebab tidak jelas/luar kendali (mis. "GTJ") digabung ke External
+}
+
+// hitung penyebab per bulan dari TRIP_LOG (data live), respect filter kategori & tahun
+function realCauseTotals(cat, year){
+  const internal = Array(12).fill(0), external = Array(12).fill(0);
+  TRIP_LOG.forEach(item=>{
+    const parts = (item.tanggal || '').split('/');
+    const yr = parts.length === 3 ? parseInt(parts[2]) : null;
+    if(yr !== year) return;
+    if(cat === 'lt5' && !(item.durasi < 5)) return;
+    if(cat === 'gt5' && !(item.durasi >= 5)) return;
+    const c = classifyCause(item);
+    if(c === 'internal') internal[item.bulanIdx]++;
+    else external[item.bulanIdx]++;
+  });
+  return { internal, external };
+}
+
+// -------------------------------------------------------------
+// RINCIAN PENYEBAB (root cause detail)
+// Pakai isi kolom KATEGORI PENYEBAB apa adanya kalau tersedia,
+// fallback ke kata kunci dari TEMUAN kalau kolom itu kosong/tidak ada.
+// -------------------------------------------------------------
+const ROOT_CAUSE_FALLBACK_RULES = [
+  { label: "POHON",      kw: ['POHON','RANTING','DAUN','PALEM'] },
+  { label: "LAYANGAN",   kw: ['LAYANGAN'] },
+  { label: "BINATANG",   kw: ['BINATANG','ULAR','TUPAI','BIAWAK','TIKUS'] },
+  { label: "PETIR",      kw: ['PETIR'] },
+  { label: "KONDUKTOR",  kw: ['KABEL','KONDUKTOR','RANTAS'] },
+  { label: "PIHAK KETIGA", kw: ['PIHAK','KENDARAAN','KECELAKAAN'] },
+  { label: "TIANG/TRAVERS", kw: ['TIANG','TRAVES','KONSTRUKSI'] },
+  { label: "FCO",        kw: ['FCO','FUSE'] },
+  { label: "ARRESTER",   kw: ['ARRESTER'] },
+  { label: "BENDA ASING",kw: ['ATAP','SENG','BENDA'] },
+  { label: "JUMPER",     kw: ['JUMPER'] },
+  { label: "ISOLATOR",   kw: ['ISOLATOR','CLAMP'] },
+  { label: "RECLOSER/RELAY", kw: ['RECLOSER','RELAY'] },
+];
+const ROOT_CAUSE_UNKNOWN_LABEL = "GTJ";
+const ROOT_CAUSE_PALETTE = ['#3b82f6','#f59e0b','#10b981','#ef4444','#fb923c','#0ea5e9','#14b8a6','#f43f5e','#84cc16','#0891b2','#eab308','#6b7280','#a3a3a3','#64748b','#22c55e','#6366f1'];
+
+function classifyDetailedCause(item){
+  // utamakan kolom KATEGORI PENYEBAB persis seperti tertulis di sheet
+  const explicit = (item.kategoriPenyebab || '').trim();
+  if(explicit) return explicit.toUpperCase();
+  // fallback: tebak dari kata kunci di TEMUAN
+  const t = (item.temuan || '').toUpperCase();
+  for(const rule of ROOT_CAUSE_FALLBACK_RULES){
+    if(rule.kw.some(k=> t.includes(k))) return rule.label;
+  }
+  return ROOT_CAUSE_UNKNOWN_LABEL;
+}
+
+// hitung rincian penyebab (root cause) dari TRIP_LOG, respect filter kategori & tahun
+function realRootCauseTotals(cat, year){
+  const counts = {};
+  TRIP_LOG.forEach(item=>{
+    const parts = (item.tanggal || '').split('/');
+    const yr = parts.length === 3 ? parseInt(parts[2]) : null;
+    if(yr !== year) return;
+    if(cat === 'lt5' && !(item.durasi < 5)) return;
+    if(cat === 'gt5' && !(item.durasi >= 5)) return;
+    const label = classifyDetailedCause(item);
+    counts[label] = (counts[label] || 0) + 1;
+  });
+  return Object.entries(counts)
+    .map(([label, count])=> ({ label, count }))
+    .sort((a,b)=> b.count - a.count)
+    .map((row, idx)=> ({ ...row, color: ROOT_CAUSE_PALETTE[idx % ROOT_CAUSE_PALETTE.length] }));
+}
+
+// ikon emoji per kategori penyebab biar list-nya lebih eye-catching
+function iconForCause(label){
+  const t = (label || '').toUpperCase();
+  if(t.includes('POHON') || t.includes('RANTING') || t.includes('DAUN')) return '🌳';
+  if(t.includes('LAYANG')) return '🪁';
+  if(t.includes('BINATANG') || t.includes('ULAR') || t.includes('TUPAI') || t.includes('BIAWAK')) return '🐾';
+  if(t.includes('PETIR')) return '⚡';
+  if(t.includes('KONDUKTOR') || t.includes('KABEL')) return '🔌';
+  if(t.includes('PIHAK') || t.includes('KENDARAAN')) return '👷';
+  if(t.includes('TIANG') || t.includes('TRAVES') || t.includes('TRAVERS')) return '🏗️';
+  if(t.includes('FCO') || t.includes('FUSE')) return '🧯';
+  if(t.includes('ARRESTER')) return '🛡️';
+  if(t.includes('BENDA') || t.includes('ATAP') || t.includes('SENG')) return '🧱';
+  if(t.includes('JUMPER')) return '🔗';
+  if(t.includes('ISOLATOR') || t.includes('CLAMP')) return '⚙️';
+  if(t.includes('RECLOSER') || t.includes('RELAY')) return '🔁';
+  if(t === 'GTJ' || t.includes('TIDAK JELAS')) return '❓';
+  return '📍';
+}
+
+function renderRincianPenyebab(){
+  const container = document.getElementById("rincianPenyebabList");
+  const tag = document.getElementById("rincianPenyebabTag");
+  if(!container) return;
+
+  if(!USE_REAL_CAUSE_DATA){
+    tag.textContent = "Data belum tersedia";
+    container.innerHTML = `<p class="empty-state" style="padding:30px 10px;">Rincian penyebab hanya tersedia saat data live dari spreadsheet berhasil dimuat.<br>Cek: sheet sudah di-share "Anyone with the link → Viewer"? Buka Console (F12) untuk lihat pesan errornya.</p>`;
+    return;
+  }
+
+  const rows = realRootCauseTotals(state.cat, state.year);
+  if(!rows.length){
+    tag.textContent = `Tahun ${state.year}`;
+    container.innerHTML = `<p class="empty-state" style="padding:30px 10px;">Tidak ada data kejadian untuk filter ini.</p>`;
+    return;
+  }
+
+  tag.textContent = `${sum(rows.map(r=>r.count))} kejadian · Tahun ${state.year}`;
+  const maxCount = Math.max(...rows.map(r=> r.count), 1);
+
+  container.innerHTML = rows.map(r=>{
+    const pct = Math.max((r.count / maxCount) * 100, 4);
+    return `
+      <div class="rc-row">
+        <div class="rc-label">${iconForCause(r.label)} ${r.label}</div>
+        <div class="rc-track"><div class="rc-fill" style="width:${pct}%; background:${r.color};"></div></div>
+        <div class="rc-val">${r.count}</div>
+      </div>`;
+  }).join('');
+}
+
+
 let state = { year: 2026, cat: "all", month: -1 };
 let localState = { kpSearch: "", kpSort: "total-desc", logSearch: "", logDurasi: "all", logSort: "no-asc", causeMonth: -1, kpCat: "all", logCat: "all", waktuCat: "all" };
 // ============================================================
@@ -1043,7 +1281,9 @@ function renderTrendChart(){
 // ============================================================
 function renderCauseChart(){
   const y = state.year;
-  const cause = causeTotals(state.cat, y);
+  const cause = USE_REAL_CAUSE_DATA
+    ? realCauseTotals(state.cat, y)
+    : causeTotals(state.cat, y);
   const container = document.getElementById("causeChart");
   container.innerHTML = "";
 
@@ -1064,16 +1304,18 @@ function renderCauseChart(){
 
   const legend = document.createElement("div");
   legend.className = "svg-legend";
-  legend.innerHTML = `<span><span class="legend-sq" style="background:#7c3aed"></span>Internal Unit</span><span><span class="legend-sq" style="background:#f59e0b"></span>External Unit</span>`;
+  legend.innerHTML = `<span><span class="legend-sq" style="background:#3b82f6"></span>Internal Unit</span><span><span class="legend-sq" style="background:#f59e0b"></span>External Unit</span>`;
   container.appendChild(legend);
 
   const n = labels.length;
-  const W = 600, H = 230, padL = 30, padR = 14, padT = 14, padB = 26;
+  const W = 600, H = 230, padL = 30, padR = 14, padT = 22, padB = 26;
   const innerW = W - padL - padR, innerH = H - padT - padB;
   const stackTotals = months.map((mi,idx)=> internalArr[idx] + externalArr[idx]);
   const maxStack = Math.max(...stackTotals, 1);
   const niceMax = Math.ceil(maxStack*1.18) || 1;
-  const xPos = i => n===1 ? padL+innerW/2 : padL + innerW*i/(n-1);
+  const baseline = padT + innerH;
+  const slot = innerW / n;
+  const xPos = i => padL + slot*i + slot/2;
   const yPos = v => padT + innerH - (v/niceMax)*innerH;
 
   const svg = svgEl("svg", { viewBox:`0 0 ${W} ${H}`, preserveAspectRatio:"none" });
@@ -1081,11 +1323,11 @@ function renderCauseChart(){
   // grid
   const steps = 4;
   for(let s=0; s<=steps; s++){
-    const v = (niceMax/steps)*s;
+    const v = Math.round((niceMax/steps)*s);
     const gy = yPos(v);
     svg.appendChild(svgEl("line", { x1:padL, x2:W-padR, y1:gy, y2:gy, stroke:"#f3f1fc", "stroke-width":1 }));
     const t = svgEl("text", { x:2, y:gy+3, "font-size":9, fill:"#a8a3c4", "font-family":"Plus Jakarta Sans" });
-    t.textContent = v.toFixed(1);
+    t.textContent = v;
     svg.appendChild(t);
   }
   labels.forEach((m,i)=>{
@@ -1094,69 +1336,36 @@ function renderCauseChart(){
     svg.appendChild(t);
   });
 
-  if(n === 1){
-    // single month: tampilkan sebagai 1 batang area lebar (mirip Image 1: Participation Overview)
-    const barW = Math.min(innerW*0.5, 220);
-    const bx = xPos(0) - barW/2;
-    const vi = internalArr[0], ve = externalArr[0];
+  // bar chart bertumpuk (Internal -> External) per bulan - gaya Participation Overview
+  const barW = Math.min(slot*0.55, 46);
+  months.forEach((mi,i)=>{
+    const cx = xPos(i);
+    const bx = cx - barW/2;
+    const vi = internalArr[i], ve = externalArr[i];
     const hi = (vi/niceMax)*innerH, he = (ve/niceMax)*innerH;
-    const topI = padT+innerH-hi;
-    const topE = topI-he;
+    const topI = baseline - hi;
+    const topE = topI - he;
 
-    const rInt = svgEl("rect", { x:bx, y:topI, width:barW, height:Math.max(hi,0), fill:"#7c3aed" });
-    svg.appendChild(rInt);
-    const rExt = svgEl("rect", { x:bx, y:Math.max(topE,padT), width:barW, height:Math.max(he,0), fill:"#f59e0b" });
-    svg.appendChild(rExt);
+    if(hi > 0){
+      const rInt = svgEl("rect", { x:bx, y:topI, width:barW, height:hi, fill:"#3b82f6", rx:4, class:"svg-pt" });
+      rInt.addEventListener("mouseenter", ()=> showTip(container, cx/W*container.clientWidth, topI/H*container.clientHeight, `<b>${labels[i]}</b> · Internal: ${vi}`));
+      rInt.addEventListener("mouseleave", ()=> hideTip(container));
+      svg.appendChild(rInt);
+    }
+    if(he > 0){
+      const rExt = svgEl("rect", { x:bx, y:Math.max(topE,padT), width:barW, height:he, fill:"#f59e0b", rx:4, class:"svg-pt" });
+      rExt.addEventListener("mouseenter", ()=> showTip(container, cx/W*container.clientWidth, Math.max(topE,padT)/H*container.clientHeight, `<b>${labels[i]}</b> · External: ${ve}`));
+      rExt.addEventListener("mouseleave", ()=> hideTip(container));
+      svg.appendChild(rExt);
+    }
 
-    if(vi>0){
-      const lt = svgEl("text", { x:bx+barW/2, y:(topI+padT+innerH)/2+4, "text-anchor":"middle", "font-size":13, "font-weight":800, fill:"#fff", "font-family":"Space Grotesk" });
-      lt.textContent = vi;
+    const total = vi + ve;
+    if(total > 0){
+      const lt = svgEl("text", { x:cx, y:Math.max(topE,padT)-6, "text-anchor":"middle", "font-size":10, "font-weight":800, fill:"#3a3460", "font-family":"Space Grotesk" });
+      lt.textContent = total;
       svg.appendChild(lt);
     }
-    if(ve>0){
-      const lt2 = svgEl("text", { x:bx+barW/2, y:(topE+topI)/2+4, "text-anchor":"middle", "font-size":11, "font-weight":800, fill:"#fff", "font-family":"Space Grotesk" });
-      lt2.textContent = ve;
-      svg.appendChild(lt2);
-    }
-  } else {
-    // semua bulan: stacked area chart
-    const baseline = padT+innerH;
-    const internalTop = months.map((mi,i)=> baseline - (internalArr[i]/niceMax)*innerH);
-    const stackTop = months.map((mi,i)=> baseline - (stackTotals[i]/niceMax)*innerH);
-
-    const ptsBase = months.map((mi,i)=> [xPos(i), baseline]);
-    const ptsInt = months.map((mi,i)=> [xPos(i), internalTop[i]]);
-    const ptsStack = months.map((mi,i)=> [xPos(i), stackTop[i]]);
-
-    // area internal (bawah)
-    const dInt = ptsInt.map((p,i)=>(i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")
-      + ` L${ptsBase[ptsBase.length-1][0].toFixed(1)},${ptsBase[ptsBase.length-1][1]} L${ptsBase[0][0].toFixed(1)},${ptsBase[0][1]} Z`;
-    svg.appendChild(svgEl("path", { d:dInt, fill:"#7c3aed", "fill-opacity":0.85 }));
-
-    // area external (atas, ditumpuk di atas internal)
-    const dExt = ptsStack.map((p,i)=>(i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")
-      + " " + ptsInt.slice().reverse().map(p=>"L"+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ") + " Z";
-    svg.appendChild(svgEl("path", { d:dExt, fill:"#f59e0b", "fill-opacity":0.85 }));
-
-    // garis tepi
-    const lineInt = ptsInt.map((p,i)=>(i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
-    svg.appendChild(svgEl("path", { d:lineInt, fill:"none", stroke:"#5b21b6", "stroke-width":1.5 }));
-    const lineStack = ptsStack.map((p,i)=>(i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
-    svg.appendChild(svgEl("path", { d:lineStack, fill:"none", stroke:"#b45309", "stroke-width":1.5 }));
-
-    // hover points
-    months.forEach((mi,i)=>{
-      const c1 = svgEl("circle", { cx:ptsInt[i][0], cy:ptsInt[i][1], r:3.5, fill:"#7c3aed", stroke:"#fff", "stroke-width":1.4, class:"svg-pt" });
-      c1.addEventListener("mouseenter", ()=> showTip(container, ptsInt[i][0]/W*container.clientWidth, ptsInt[i][1]/H*container.clientHeight, `<b>${labels[i]}</b> · Internal: ${internalArr[i]}`));
-      c1.addEventListener("mouseleave", ()=> hideTip(container));
-      svg.appendChild(c1);
-
-      const c2 = svgEl("circle", { cx:ptsStack[i][0], cy:ptsStack[i][1], r:3.5, fill:"#f59e0b", stroke:"#fff", "stroke-width":1.4, class:"svg-pt" });
-      c2.addEventListener("mouseenter", ()=> showTip(container, ptsStack[i][0]/W*container.clientWidth, ptsStack[i][1]/H*container.clientHeight, `<b>${labels[i]}</b> · External: ${externalArr[i]}`));
-      c2.addEventListener("mouseleave", ()=> hideTip(container));
-      svg.appendChild(c2);
-    });
-  }
+  });
 
   container.appendChild(svg);
 }
@@ -1328,7 +1537,7 @@ function renderRadarSVG(containerId, labels, datasetsArr){
 const WAKTU_ORDER = ["Subuh","Pagi","Siang","Sore","Malam"];
 
 function renderRadarChart(){
-  document.getElementById("waktuCuacaTag").textContent = state.year === 2026 ? `${monthLabel()} · log kejadian 2026` : "Log kejadian tidak tersedia untuk tahun ini";
+  // (tag keterangan bulan di panel Waktu Trip & Cuaca sudah dihapus dari UI)
 
   const container = document.getElementById("radarChart");
   if(state.year !== 2026){ container.innerHTML = `<p class="empty-state" style="padding:60px 10px;">Log kejadian tidak tersedia untuk tahun ini.</p>`; return; }
@@ -1525,6 +1734,7 @@ function renderAll(){
   renderKPI();
   renderTrendChart();
   renderCauseChart();
+  renderRincianPenyebab();
   renderCompChart();
   renderRadarChart();
   renderWeatherChart();
@@ -1639,7 +1849,14 @@ try{ savedTheme = localStorage.getItem("interruptions-theme") || "light"; }catch
 applyTheme(savedTheme);
 
 // init
-renderAll();
+(async function init(){
+  const liveLog = await loadTripLogFromSheet();
+  if(liveLog && liveLog.length){
+    TRIP_LOG = liveLog;
+    USE_REAL_CAUSE_DATA = true;
+  }
+  renderAll();
+})();
 </script>
 </body>
 </html>
