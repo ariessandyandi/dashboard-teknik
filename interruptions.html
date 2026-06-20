@@ -967,6 +967,45 @@ function realCauseTotals(cat, year){
 }
 
 // -------------------------------------------------------------
+// SINKRONISASI: timpa data contoh (TREND_*, KEYPOINT_*) dengan
+// hasil hitung dari TRIP_LOG live, supaya KPI/Trend/Keypoint
+// konsisten dengan Log Kejadian (yang sudah live duluan).
+// -------------------------------------------------------------
+function rebuildLiveTrendAndKeypoint(){
+  const perYear = {};
+  TRIP_LOG.forEach(item=>{
+    const parts = (item.tanggal || '').split('/');
+    const yr = parts.length === 3 ? parseInt(parts[2]) : null;
+    if(!yr) return;
+    if(!perYear[yr]) perYear[yr] = { total: Array(12).fill(0), lt5: Array(12).fill(0), gt5: Array(12).fill(0), kp: {} };
+    const yd = perYear[yr];
+    yd.total[item.bulanIdx]++;
+    const isLt5 = item.durasi < 5;
+    if(isLt5) yd.lt5[item.bulanIdx]++; else yd.gt5[item.bulanIdx]++;
+
+    const kpName = (item.keypoint || 'TANPA KEYPOINT').trim();
+    if(!yd.kp[kpName]) yd.kp[kpName] = { lt5: Array(12).fill(0), gt5: Array(12).fill(0) };
+    if(isLt5) yd.kp[kpName].lt5[item.bulanIdx]++; else yd.kp[kpName].gt5[item.bulanIdx]++;
+  });
+
+  Object.keys(perYear).forEach(yr=>{
+    const yd = perYear[yr];
+    TREND_TOTAL[yr] = yd.total;
+    TREND_TEMPORER[yr] = yd.lt5;
+    TREND_PERMANEN[yr] = yd.gt5;
+
+    const lt5List = [], gt5List = [];
+    Object.entries(yd.kp).forEach(([name, v])=>{
+      const totalLt5 = sum(v.lt5), totalGt5 = sum(v.gt5);
+      if(totalLt5 > 0) lt5List.push({ name, values: v.lt5, total: totalLt5 });
+      if(totalGt5 > 0) gt5List.push({ name, values: v.gt5, total: totalGt5 });
+    });
+    KEYPOINT_LT5[yr] = lt5List;
+    KEYPOINT_GT5[yr] = gt5List;
+  });
+}
+
+// -------------------------------------------------------------
 // RINCIAN PENYEBAB (root cause detail)
 // Pakai isi kolom KATEGORI PENYEBAB apa adanya kalau tersedia,
 // fallback ke kata kunci dari TEMUAN kalau kolom itu kosong/tidak ada.
@@ -1304,11 +1343,11 @@ function renderCauseChart(){
 
   const legend = document.createElement("div");
   legend.className = "svg-legend";
-  legend.innerHTML = `<span><span class="legend-sq" style="background:#3b82f6"></span>Internal Unit</span><span><span class="legend-sq" style="background:#f59e0b"></span>External Unit</span>`;
+  legend.innerHTML = `<span><span class="legend-sq" style="background:linear-gradient(135deg,#60a5fa,#2563eb)"></span>Internal Unit</span><span><span class="legend-sq" style="background:linear-gradient(135deg,#fbbf24,#ea580c)"></span>External Unit</span>`;
   container.appendChild(legend);
 
   const n = labels.length;
-  const W = 600, H = 230, padL = 30, padR = 14, padT = 22, padB = 26;
+  const W = 600, H = 240, padL = 30, padR = 14, padT = 26, padB = 28;
   const innerW = W - padL - padR, innerH = H - padT - padB;
   const stackTotals = months.map((mi,idx)=> internalArr[idx] + externalArr[idx]);
   const maxStack = Math.max(...stackTotals, 1);
@@ -1320,24 +1359,40 @@ function renderCauseChart(){
 
   const svg = svgEl("svg", { viewBox:`0 0 ${W} ${H}`, preserveAspectRatio:"none" });
 
-  // grid
+  // ---- defs: gradient & shadow biar lebih eyecatching ----
+  const defs = svgEl("defs", {});
+  const gradInt = svgEl("linearGradient", { id:"gradInternal", x1:"0", y1:"0", x2:"0", y2:"1" });
+  gradInt.appendChild(svgEl("stop", { offset:"0%", "stop-color":"#60a5fa" }));
+  gradInt.appendChild(svgEl("stop", { offset:"100%", "stop-color":"#2563eb" }));
+  defs.appendChild(gradInt);
+  const gradExt = svgEl("linearGradient", { id:"gradExternal", x1:"0", y1:"0", x2:"0", y2:"1" });
+  gradExt.appendChild(svgEl("stop", { offset:"0%", "stop-color":"#fbbf24" }));
+  gradExt.appendChild(svgEl("stop", { offset:"100%", "stop-color":"#ea580c" }));
+  defs.appendChild(gradExt);
+  const shadow = svgEl("filter", { id:"barShadow", x:"-40%", y:"-20%", width:"180%", height:"160%" });
+  shadow.innerHTML = `<feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#1e293b" flood-opacity="0.18"/>`;
+  defs.appendChild(shadow);
+  svg.appendChild(defs);
+
+  // grid (garis putus-putus halus)
   const steps = 4;
   for(let s=0; s<=steps; s++){
     const v = Math.round((niceMax/steps)*s);
     const gy = yPos(v);
-    svg.appendChild(svgEl("line", { x1:padL, x2:W-padR, y1:gy, y2:gy, stroke:"#f3f1fc", "stroke-width":1 }));
+    svg.appendChild(svgEl("line", { x1:padL, x2:W-padR, y1:gy, y2:gy, stroke:"#eef0f7", "stroke-width":1, "stroke-dasharray":"3,4" }));
     const t = svgEl("text", { x:2, y:gy+3, "font-size":9, fill:"#a8a3c4", "font-family":"Plus Jakarta Sans" });
     t.textContent = v;
     svg.appendChild(t);
   }
   labels.forEach((m,i)=>{
-    const t = svgEl("text", { x:xPos(i), y:H-6, "font-size":9.5, fill:"#6b6489", "font-weight":600, "text-anchor":"middle", "font-family":"Plus Jakarta Sans" });
+    const t = svgEl("text", { x:xPos(i), y:H-8, "font-size":10, fill:"#475569", "font-weight":700, "text-anchor":"middle", "font-family":"Plus Jakarta Sans" });
     t.textContent = m;
     svg.appendChild(t);
   });
 
-  // bar chart bertumpuk (Internal -> External) per bulan - gaya Participation Overview
-  const barW = Math.min(slot*0.55, 46);
+  // bar chart bertumpuk (Internal -> External) per bulan - gaya Participation Overview, dengan gradasi + shadow
+  const barW = Math.min(slot*0.6, 50);
+  const radius = Math.min(barW/2.4, 10);
   months.forEach((mi,i)=>{
     const cx = xPos(i);
     const bx = cx - barW/2;
@@ -1345,23 +1400,40 @@ function renderCauseChart(){
     const hi = (vi/niceMax)*innerH, he = (ve/niceMax)*innerH;
     const topI = baseline - hi;
     const topE = topI - he;
+    const total = vi + ve;
+
+    const grp = svgEl("g", {});
+    if(total > 0) grp.setAttribute("filter", "url(#barShadow)");
 
     if(hi > 0){
-      const rInt = svgEl("rect", { x:bx, y:topI, width:barW, height:hi, fill:"#3b82f6", rx:4, class:"svg-pt" });
+      const rInt = svgEl("rect", {
+        x:bx, y:topI, width:barW, height:hi,
+        fill:"url(#gradInternal)",
+        rx: radius, ry: radius,
+        class:"svg-pt"
+      });
       rInt.addEventListener("mouseenter", ()=> showTip(container, cx/W*container.clientWidth, topI/H*container.clientHeight, `<b>${labels[i]}</b> · Internal: ${vi}`));
       rInt.addEventListener("mouseleave", ()=> hideTip(container));
-      svg.appendChild(rInt);
+      grp.appendChild(rInt);
     }
     if(he > 0){
-      const rExt = svgEl("rect", { x:bx, y:Math.max(topE,padT), width:barW, height:he, fill:"#f59e0b", rx:4, class:"svg-pt" });
+      const rExt = svgEl("rect", {
+        x:bx, y:Math.max(topE,padT), width:barW, height:he,
+        fill:"url(#gradExternal)",
+        rx: radius, ry: radius,
+        class:"svg-pt"
+      });
       rExt.addEventListener("mouseenter", ()=> showTip(container, cx/W*container.clientWidth, Math.max(topE,padT)/H*container.clientHeight, `<b>${labels[i]}</b> · External: ${ve}`));
       rExt.addEventListener("mouseleave", ()=> hideTip(container));
-      svg.appendChild(rExt);
+      grp.appendChild(rExt);
     }
+    svg.appendChild(grp);
 
-    const total = vi + ve;
     if(total > 0){
-      const lt = svgEl("text", { x:cx, y:Math.max(topE,padT)-6, "text-anchor":"middle", "font-size":10, "font-weight":800, fill:"#3a3460", "font-family":"Space Grotesk" });
+      const labelY = Math.max(topE,padT) - 14;
+      const pillW = String(total).length > 1 ? 22 : 18;
+      svg.appendChild(svgEl("rect", { x:cx-pillW/2, y:labelY-12, width:pillW, height:17, rx:8, fill:"#1e293b" }));
+      const lt = svgEl("text", { x:cx, y:labelY, "text-anchor":"middle", "font-size":10.5, "font-weight":800, fill:"#ffffff", "font-family":"Space Grotesk" });
       lt.textContent = total;
       svg.appendChild(lt);
     }
@@ -1854,6 +1926,7 @@ applyTheme(savedTheme);
   if(liveLog && liveLog.length){
     TRIP_LOG = liveLog;
     USE_REAL_CAUSE_DATA = true;
+    rebuildLiveTrendAndKeypoint();
   }
   renderAll();
 })();
