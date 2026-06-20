@@ -951,7 +951,7 @@ async function loadTripLogFromSheet(){
 // Kolom (posisi tetap, sesuai struktur sheet): R=kategori, S=tahun,
 // T=label baris, U..AF=Jan..Des (12 bulan), AG=total tahunan.
 // ============================================================
-const CAUSE_SHEET_GID = 'PASTE_GID_SHEET_RAW_DASHBOARD_ARIES_DISINI'; // <-- ganti dengan gid tab "RAW DASHBOARD ARIES"
+const CAUSE_SHEET_GID = '2107201497'; // gid tab "RAW DASHBOARD ARIES"
 const CAUSE_CSV_URL = `https://docs.google.com/spreadsheets/d/e/${RAW_SHEET_PUB_ID}/pub?gid=${CAUSE_SHEET_GID}&single=true&output=csv`;
 
 // posisi kolom (0-indexed): A=0 ... R=17, S=18, T=19, U=20 ... AF=31, AG=32
@@ -960,6 +960,15 @@ const CAUSE_COL = { kategori: 17, tahun: 18, label: 19, bulanStart: 20, bulanCou
 let RAW_CAUSE_TOTALS = {};      // { [tahun]: { all:{internal,external}, lt5:{...}, gt5:{...} } }
 let RAW_CATEGORY_TOTALS = {};   // { [tahun]: { lt5:[12 bulan], gt5:[12 bulan] } } -- dari baris R="<5/>5 MENIT", T="TOTAL"
 let USE_RAW_CAUSE_TOTALS = false;
+
+// Pemetaan manual nomor baris sheet (1-indexed, sesuai nomor baris di Google Sheets) untuk
+// baris "TOTAL" per kategori <5 MENIT / >5 MENIT. Dipakai langsung (bukan cocokkan teks label)
+// karena di sheet ada beberapa baris berlabel "TOTAL" sehingga pencocokan teks bisa salah ambil baris.
+// Tambah/ubah baris di sini kalau struktur sheet berubah atau ada tahun baru.
+const TOTAL_ROW_MAP = {
+  2026: { lt5: 11, gt5: 25 },
+  2025: { lt5: 40, gt5: 55 }
+};
 
 async function loadCauseTotalsFromSheet(){
   try{
@@ -1007,8 +1016,26 @@ async function loadCauseTotalsFromSheet(){
       }
     });
 
+    // ---- override pasti: ambil baris TOTAL <5/>5 MENIT langsung by nomor baris (TOTAL_ROW_MAP) ----
+    // rows[] hasil parseCSVRows 0-indexed & tanpa header terpisah, jadi nomor baris sheet N -> rows[N-1]
+    Object.keys(TOTAL_ROW_MAP).forEach(tahunStr=>{
+      const tahun = parseInt(tahunStr);
+      const map = TOTAL_ROW_MAP[tahun];
+      ['lt5','gt5'].forEach(cat=>{
+        const rowNum = map[cat];
+        const row = rows[rowNum - 1];
+        if(!row){ console.warn(`TOTAL_ROW_MAP: baris ${rowNum} (${cat} ${tahun}) tidak ditemukan di CSV.`); return; }
+        const months = [];
+        for(let i=0; i<CAUSE_COL.bulanCount; i++){
+          months.push(parseFloat((row[CAUSE_COL.bulanStart+i]||'0').replace(',', '.')) || 0);
+        }
+        if(!categoryTotals[tahun]) categoryTotals[tahun] = {};
+        categoryTotals[tahun][cat] = months;
+      });
+    });
+
     console.log('Rekap Internal/External dimuat dari sheet:', result);
-    console.log('Rekap Total per kategori (KPI) dimuat dari sheet:', categoryTotals);
+    console.log('Rekap Total per kategori (KPI) dimuat dari sheet (via TOTAL_ROW_MAP):', categoryTotals);
     return { causeByBucket: result, categoryTotals };
   }catch(err){
     console.error('Gagal memuat rekap Internal/External resmi, fallback ke estimasi kata kunci:', err);
