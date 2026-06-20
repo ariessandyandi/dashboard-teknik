@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interruptions | PLN ULP Sekura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ===== ENERGY PULSE PALETTE (LIGHT MODE / DEFAULT) ===== */
+    --bg-deep:#140b2e;
+    --bg-deep-2:#1d1147;
+    --surface:#ffffff;
+    --surface-soft:#f8f7ff;
+
+    --violet:#7c3aed;
+    --violet-soft:#a78bfa;
+    --pink:#ec4899;
+    --magenta:#d946ef;
+
+    --cyan:#22d3ee;
+    --teal:#06b6d4;
+
+    --coral:#fb7185;
+    --orange:#fb923c;
+    --amber:#fbbf24;
+
+    --ink:#1b1133;
+    --ink-soft:#6b6489;
+    --ink-faint:#a8a3c4;
+    --hairline:#ece9fb;
+
+    --r-lg:20px;
+    --r-md:14px;
+    --r-sm:10px;
+
+    --shadow-card:0 2px 8px rgba(76,29,149,.06), 0 16px 40px -16px rgba(76,29,149,.18);
+    --shadow-pop:0 10px 30px -8px rgba(124,58,237,.45);
+
+    --body-bg-1: radial-gradient(1100px 600px at 100% -10%, #2a1a5e 0%, transparent 60%);
+    --body-bg-2: radial-gradient(900px 500px at -10% 100%, #1a3a5e 0%, transparent 55%);
+    --body-bg-base: #1d1147;
+
+    --sidebar-bg: linear-gradient(165deg,#1d1147 0%, #140b2e 55%, #0e0726 100%);
+  }
+
+  [data-theme="dark"]{
+    --surface:#1a1530;
+    --surface-soft:#211c3d;
+    --ink:#f1eefc;
+    --ink-soft:#b8b0d9;
+    --ink-faint:#766fa0;
+    --hairline:#352c5c;
+
+    --shadow-card:0 2px 8px rgba(0,0,0,.25), 0 16px 40px -16px rgba(0,0,0,.5);
+
+    --body-bg-1: radial-gradient(1100px 600px at 100% -10%, #1c1140 0%, transparent 60%);
+    --body-bg-2: radial-gradient(900px 500px at -10% 100%, #0f1f38 0%, transparent 55%);
+    --body-bg-base: #0a0718;
+
+    --sidebar-bg: linear-gradient(165deg,#120c28 0%, #0a0718 55%, #050310 100%);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Plus Jakarta Sans",sans-serif;
+    background:
+      var(--body-bg-1),
+      var(--body-bg-2),
+      var(--body-bg-base);
+    color:var(--ink);
+    min-height:100vh;
+    transition:background-color .25s;
+  }
+  h1,h2,h3, .num-display{ font-family:"Space Grotesk",sans-serif; }
+
+  /* ===================== LAYOUT ===================== */
+  .app{display:flex; min-height:100vh;}
+
+  /* ---- SIDEBAR ---- */
+  .sidebar{
+    width:252px;
+    flex-shrink:0;
+    background:var(--sidebar-bg);
+    color:#cfc8ec;
+    display:flex;
+    flex-direction:column;
+    padding:22px 0 18px;
+    position:relative;
+  }
+  .sidebar::after{
+    content:"";
+    position:absolute; top:0; right:0; bottom:0; width:1px;
+    background:linear-gradient(180deg, rgba(124,58,237,.5), rgba(236,72,153,.2), transparent);
+  }
+  .sb-brand{
+    display:flex; align-items:center; gap:11px;
+    padding:0 22px 20px; margin-bottom:10px;
+  }
+  .sb-brand .logo{
+    width:38px;height:38px;border-radius:11px;
+    background:linear-gradient(135deg,var(--violet),var(--pink));
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;color:#fff;font-size:13px;
+    box-shadow:0 6px 16px -4px rgba(236,72,153,.55);
+    font-family:"Space Grotesk",sans-serif;
+  }
+  .sb-brand .name{font-size:14px;font-weight:700;color:#fff;line-height:1.25;}
+  .sb-brand .sub{font-size:11px;color:#9088b8;}
+
+  .sb-section-label{
+    font-size:10px; letter-spacing:.12em; color:#5f5790;
+    text-transform:uppercase; padding:16px 22px 8px; font-weight:700;
+  }
+  .sb-link{
+    display:flex; align-items:center; gap:11px;
+    margin:1px 12px; padding:10px 12px;
+    font-size:13.5px; color:#b3acd6; text-decoration:none;
+    border-radius:11px; cursor:pointer; font-weight:500;
+    transition:background .15s, color .15s;
+  }
+  .sb-link svg{width:17px;height:17px;flex-shrink:0;opacity:.8;}
+  .sb-link:hover{ background:rgba(255,255,255,.06); color:#fff; }
+  .sb-link.active{
+    background:linear-gradient(90deg, rgba(124,58,237,.35), rgba(236,72,153,.12));
+    color:#fff; font-weight:700;
+    box-shadow: inset 0 0 0 1px rgba(167,139,250,.3);
+  }
+  .sb-link.active svg{ opacity:1; color:var(--cyan);}
+  .sb-link.sub.active{ background:rgba(34,211,238,.12); box-shadow:inset 0 0 0 1px rgba(34,211,238,.35);}
+  .sb-link.sub.active svg{ color:var(--cyan); }
+  .sb-foot{
+    margin-top:auto; padding:16px 22px 0; font-size:10.5px; color:#4d4678;
+  }
+
+  /* ---- MAIN ---- */
+  .main{ flex:1; min-width:0; padding:26px 30px 44px; }
+
+  .topbar{
+    display:flex; align-items:flex-start; justify-content:space-between;
+    margin-bottom:22px; flex-wrap:wrap; gap:14px;
+  }
+  .topbar h1{
+    font-size:26px; margin:0 0 5px; font-weight:700; color:#fff; letter-spacing:-.02em;
+  }
+  .topbar p{ margin:0; font-size:13.5px; color:#a79fcf; }
+  .live{
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:12px; color:#cfc8ec; background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12); border-radius:30px; padding:7px 14px;
+    backdrop-filter:blur(6px);
+  }
+  .live .dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 0 rgba(34,211,238,.6); animation:pulse 1.8s infinite;}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(34,211,238,.55);}
+    70%{box-shadow:0 0 0 7px rgba(34,211,238,0);}
+    100%{box-shadow:0 0 0 0 rgba(34,211,238,0);}
+  }
+
+  .topbar-right{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .theme-toggle{
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14);
+    border-radius:30px; padding:4px; cursor:pointer; position:relative;
+  }
+  .theme-toggle button{
+    border:none; background:transparent; color:rgba(255,255,255,.65);
+    font-size:13px; padding:6px 11px; border-radius:24px; cursor:pointer;
+    display:flex; align-items:center; gap:5px; font-weight:700; font-size:11.5px;
+    transition:all .2s;
+  }
+  .theme-toggle button.active{ background:#fff; color:#1b1133; }
+  .theme-toggle button:not(.active):hover{ color:#fff; }
+
+  /* ---- FILTER BAR ---- */
+  .filterbar{
+    background:linear-gradient(120deg, #2a1a5e 0%, #3b2278 50%, #4a1f5e 100%);
+    border-radius:var(--r-lg);
+    box-shadow:0 10px 30px -10px rgba(124,58,237,.35);
+    padding:18px 22px;
+    display:flex; flex-wrap:wrap; gap:22px; align-items:flex-end;
+    margin-bottom:20px;
+    position:relative; overflow:hidden;
+  }
+  .filterbar::before{
+    content:""; position:absolute; right:-40px; top:-50px; width:180px; height:180px;
+    border-radius:50%; background:rgba(255,255,255,.06);
+  }
+  .f-group{ display:flex; flex-direction:column; gap:7px; position:relative; z-index:1; }
+  .f-group label{ font-size:10px; font-weight:700; letter-spacing:.08em; color:rgba(255,255,255,.55); text-transform:uppercase;}
+  .seg{ display:flex; background:var(--surface-soft); border-radius:11px; padding:4px; gap:3px; }
+  .seg button{
+    border:none; background:transparent; padding:8px 15px; font-size:12.5px;
+    font-weight:700; color:var(--ink-soft); border-radius:8px; cursor:pointer;
+    white-space:nowrap; transition:all .15s;
+  }
+  .seg button:hover:not(.active){ color:var(--ink); }
+  .seg.cat button.active.all{ background:linear-gradient(135deg,#3b3160,#1b1133); color:#fff; }
+  .seg.cat button.active.lt5{ background:linear-gradient(135deg,var(--teal),var(--cyan)); color:#06303b; box-shadow:0 4px 14px -4px rgba(6,182,212,.55);}
+  .seg.cat button.active.gt5{ background:linear-gradient(135deg,#f43f5e,var(--orange)); color:#fff; box-shadow:0 4px 14px -4px rgba(244,63,94,.55);}
+
+  /* khusus .seg di dalam filterbar gradient gelap, butuh kontras putih */
+  .filterbar .seg{ background:rgba(255,255,255,.1); }
+  .filterbar .seg button{ color:rgba(255,255,255,.75); }
+  .filterbar .seg button:hover:not(.active){ color:#fff; }
+  .filterbar .seg.cat button.active.all{ background:#fff; color:#1b1133; }
+
+  select.dd{
+    border:1.5px solid var(--hairline); background:var(--surface); border-radius:10px;
+    padding:8px 12px; font-size:12.5px; font-weight:700; color:var(--ink);
+    min-width:95px; cursor:pointer;
+  }
+  .filterbar select.dd{
+    border:1.5px solid rgba(255,255,255,.18); background:rgba(255,255,255,.12); color:#fff;
+  }
+  .filterbar select.dd option{ color:#1b1133; }
+
+  .month-row{ display:flex; flex-wrap:wrap; gap:6px; max-width:600px; position:relative; z-index:1; }
+  .month-row button{
+    border:1.5px solid rgba(255,255,255,.18); background:rgba(255,255,255,.08); color:rgba(255,255,255,.75);
+    font-size:11.5px; font-weight:700; padding:7px 11px; border-radius:9px; cursor:pointer;
+    transition:all .15s;
+  }
+  .month-row button.active{
+    background:#fff; color:#1b1133; border-color:transparent;
+    box-shadow:0 4px 12px -4px rgba(0,0,0,.25);
+  }
+  .month-row button:hover:not(.active){ border-color:rgba(255,255,255,.4); color:#fff; background:rgba(255,255,255,.16); }
+
+  /* ---- WEATHER & TIME PILLS ---- */
+  .pill-row{ display:flex; flex-wrap:wrap; gap:7px; }
+  .pill{
+    border:1.5px solid var(--hairline); background:#fff; color:var(--ink-soft);
+    font-size:12px; font-weight:700; padding:7px 13px; border-radius:30px; cursor:pointer;
+    transition:all .15s; display:inline-flex; align-items:center; gap:6px;
+  }
+  .pill .ic{ font-size:14px; line-height:1; }
+  .pill:hover:not(.active){ border-color:var(--violet-soft); color:var(--violet); }
+  /* weather pills */
+  .pill[data-weather].active{ color:#fff; border-color:transparent; }
+  .pill[data-weather="all"].active{ background:linear-gradient(135deg,#3b3160,#1b1133); }
+  .pill[data-weather="Cerah"].active{ background:linear-gradient(135deg,var(--amber),var(--orange)); box-shadow:0 4px 12px -4px rgba(251,146,60,.55); }
+  .pill[data-weather="Hujan"].active{ background:linear-gradient(135deg,#3b82f6,#1d5fb8); box-shadow:0 4px 12px -4px rgba(59,130,246,.55); }
+  /* time-of-day pills */
+  .pill[data-waktu].active{ color:#fff; border-color:transparent; }
+  .pill[data-waktu="all"].active{ background:linear-gradient(135deg,#3b3160,#1b1133); }
+  .pill[data-waktu="Subuh"].active{ background:linear-gradient(135deg,#6366f1,#4338ca); box-shadow:0 4px 12px -4px rgba(99,102,241,.55); }
+  .pill[data-waktu="Pagi"].active{ background:linear-gradient(135deg,#fbbf24,#f59e0b); box-shadow:0 4px 12px -4px rgba(251,191,36,.55); }
+  .pill[data-waktu="Siang"].active{ background:linear-gradient(135deg,#22d3ee,#06b6d4); box-shadow:0 4px 12px -4px rgba(34,211,238,.55); }
+  .pill[data-waktu="Sore"].active{ background:linear-gradient(135deg,var(--orange),#ea580c); box-shadow:0 4px 12px -4px rgba(251,146,60,.55); }
+  .pill[data-waktu="Malam"].active{ background:linear-gradient(135deg,#4338ca,#1e1b4b); box-shadow:0 4px 12px -4px rgba(67,56,202,.55); }
+
+  /* ---- KPI CARDS (HERO) ---- */
+  .kpi-grid{
+    display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-bottom:20px;
+  }
+  .kpi{
+    border-radius:var(--r-lg);
+    padding:20px 20px 18px;
+    position:relative; overflow:hidden;
+    box-shadow:var(--shadow-pop);
+    color:#fff;
+    min-height:140px;
+  }
+  .kpi::before{
+    content:""; position:absolute; right:-30px; top:-30px; width:140px; height:140px;
+    border-radius:50%; background:rgba(255,255,255,.12);
+  }
+  .kpi::after{
+    content:""; position:absolute; right:20px; bottom:-40px; width:90px; height:90px;
+    border-radius:50%; background:rgba(255,255,255,.08);
+  }
+  .kpi.total{ background:linear-gradient(140deg,#6d28d9,#a21caf 60%,#ec4899); }
+  .kpi.lt5{ background:linear-gradient(140deg,#0e7490,#0891b2 55%,#22d3ee); }
+  .kpi.gt5{ background:linear-gradient(140deg,#9d174d,#e11d48 55%,#fb923c); }
+  .kpi.yoy{ background:linear-gradient(140deg,#312e81,#4338ca 55%,#7c3aed); }
+
+  .kpi .label{ font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; opacity:.85; position:relative; z-index:1;}
+  .kpi .value-row{ display:flex; align-items:baseline; gap:6px; margin:8px 0 4px; position:relative; z-index:1;}
+  .kpi .value{ font-size:36px; font-weight:700; line-height:1; letter-spacing:-.01em;}
+  .kpi .unit{ font-size:12.5px; font-weight:600; opacity:.8;}
+  .kpi .sub{ font-size:12px; font-weight:600; opacity:.85; position:relative; z-index:1;}
+  .kpi .spark{ position:absolute; right:14px; bottom:14px; width:88px; height:34px; z-index:1; opacity:.95;}
+  .delta-chip{
+    display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:800;
+    background:rgba(255,255,255,.22); padding:3px 9px; border-radius:20px; margin-top:6px; position:relative; z-index:1;
+  }
+
+  /* ---- PANELS ---- */
+  .grid-2{ display:grid; grid-template-columns:1.5fr 1fr; gap:16px; margin-bottom:18px; }
+  .panel{
+    background:var(--surface); border-radius:var(--r-lg);
+    box-shadow:var(--shadow-card); padding:20px 22px 14px;
+    transition:background-color .25s, box-shadow .25s;
+  }
+  .panel .ph{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px;}
+  .panel .ph h2{ font-size:16px; margin:0; font-weight:700; color:var(--ink);}
+  .panel .ph .tag{
+    font-size:11px; font-weight:700; color:var(--violet); background:#f1eaff;
+    padding:5px 12px; border-radius:20px;
+  }
+  .chart-wrap{ position:relative; height:290px; }
+  .chart-wrap.small{ height:240px; }
+  .svg-chart{ width:100%; height:100%; position:relative; }
+  .svg-chart svg{ width:100%; height:100%; display:block; overflow:visible; }
+  .svg-chart .svg-legend{
+    display:flex; gap:16px; justify-content:flex-end; flex-wrap:wrap;
+    font-size:11.5px; font-weight:600; color:var(--ink-soft); margin-bottom:6px;
+  }
+  .svg-chart .svg-legend.center{ justify-content:center; }
+  .svg-chart .legend-dot{ width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:5px; vertical-align:middle; }
+  .svg-chart .legend-sq{ width:10px; height:10px; border-radius:3px; display:inline-block; margin-right:5px; vertical-align:middle; }
+  .svg-tip{
+    position:absolute; pointer-events:none; background:#1b1133; color:#fff;
+    font-size:11.5px; font-weight:600; padding:7px 11px; border-radius:8px;
+    transform:translate(-50%,-115%); white-space:nowrap; z-index:5; opacity:0;
+    transition:opacity .1s; box-shadow:0 8px 20px -6px rgba(0,0,0,.35);
+  }
+  .svg-tip.show{ opacity:1; }
+  .svg-pt{ cursor:pointer; }
+
+  /* ---- PANEL FULL ---- */
+  .panel-full{
+    background:var(--surface); border-radius:var(--r-lg);
+    box-shadow:var(--shadow-card); padding:22px; margin-bottom:18px;
+    transition:background-color .25s, box-shadow .25s;
+  }
+
+  /* ---- SPLIT 2-COLUMN WITHIN ONE PANEL ---- */
+  .split-2col{ display:flex; align-items:stretch; gap:0; width:100%; }
+  .split-col{ flex:1 1 0%; min-width:0; min-height:1px; padding:0 18px; position:relative; }
+  .split-col:first-child{ padding-left:2px; }
+  .split-col:last-child{ padding-right:2px; }
+  .split-divider{ width:1px; background:var(--hairline); flex-shrink:0; margin:4px 0; }
+  .split-label{
+    font-size:12.5px; font-weight:800; color:var(--ink); margin-bottom:4px;
+    text-align:center;
+  }
+  .split-hint{
+    font-size:10.5px; color:var(--ink-faint); text-align:center; line-height:1.4;
+    margin:0 0 10px; padding:0 6px;
+  }
+  @media (max-width:760px){
+    .split-2col{ flex-direction:column; gap:18px; }
+    .split-divider{ width:auto; height:1px; margin:0; }
+  }
+
+  /* ---- LOCAL FILTER ROW (in panel-full) ---- */
+  /* ---- CAUSE SUMMARY (Internal/External) ---- */
+  .cause-summary{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:16px;
+    padding-top:16px; border-top:1px solid var(--hairline);
+  }
+  .cs-item{ text-align:center; }
+  .cs-label{
+    font-size:11px; font-weight:700; color:var(--ink-faint); text-transform:uppercase;
+    letter-spacing:.05em; margin-bottom:4px; display:flex; align-items:center; justify-content:center; gap:5px;
+  }
+  .cs-value{ font-size:24px; font-weight:800; color:var(--ink); font-family:"Space Grotesk",sans-serif; }
+
+  .local-filter-row{
+    display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;
+  }
+  .local-search{
+    flex:1; min-width:180px;
+    border:1.5px solid var(--hairline); background:var(--surface-soft);
+    border-radius:10px; padding:9px 14px; font-size:12.5px; font-weight:600;
+    color:var(--ink); font-family:"Plus Jakarta Sans",sans-serif;
+  }
+  .local-search:focus{ outline:none; border-color:var(--violet-soft); background:var(--surface); }
+  .local-filter-row select.dd{ min-width:150px; }
+
+  /* ---- KEYPOINT TABLE ---- */
+  table.kp{ width:100%; border-collapse:collapse; font-size:12.5px;}
+  table.kp thead th{
+    text-align:left; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--ink-faint); font-weight:800; padding:9px 11px; border-bottom:2px solid var(--hairline);
+    white-space:nowrap;
+  }
+  table.kp thead th.num, table.kp tbody td.num{ text-align:center; }
+  table.kp tbody td{ padding:9px 11px; border-bottom:1px solid var(--hairline); color:var(--ink); }
+  table.kp tbody tr{ transition:background .12s; }
+  table.kp tbody tr:hover{ background:var(--surface-soft); }
+  table.kp tbody td.name{ font-weight:700; }
+  table.kp tbody td.total{ font-weight:800; color:var(--violet); text-align:center; font-size:13.5px;}
+  .bar-cell{ display:flex; align-items:center; gap:9px; }
+  .bar-track{ flex:1; height:7px; background:var(--surface-soft); border-radius:6px; overflow:hidden; min-width:50px; box-shadow:inset 0 0 0 1px var(--hairline);}
+  .bar-fill{ height:100%; border-radius:6px; background:linear-gradient(90deg,var(--teal),var(--cyan)); }
+  .bar-fill.gt5{ background:linear-gradient(90deg,#f43f5e,var(--orange)); }
+  .badge-cat{ font-size:10px; font-weight:800; padding:3px 9px; border-radius:20px; display:inline-block; }
+  .badge-cat.lt5{ background:#e0fbff; color:#0891b2; }
+  .badge-cat.gt5{ background:#ffe4e9; color:#e11d48; }
+
+  /* ---- TRIP LOG ---- */
+  .log-table{ width:100%; border-collapse:collapse; font-size:12px;}
+  .log-table thead th{
+    position:sticky; top:0; background:var(--surface);
+    text-align:left; font-size:10px; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--ink-faint); font-weight:800; padding:9px 9px; border-bottom:2px solid var(--hairline);
+  }
+  .log-table tbody td{ padding:8px 9px; border-bottom:1px solid var(--hairline); vertical-align:top;}
+  .log-table tbody tr:hover{ background:var(--surface-soft); }
+  .log-scroll{ max-height:340px; overflow-y:auto; border-radius:12px;}
+  .chip{ font-size:10px; font-weight:800; padding:3px 9px; border-radius:20px; white-space:nowrap; display:inline-block;}
+  .chip.weather-hujan{ background:#e0f0ff; color:#1d5fb8;}
+  .chip.weather-cerah{ background:#fff3da; color:#b8790a;}
+  .chip.dur-short{ background:#dcfce9; color:#0e8a4f;}
+  .chip.dur-long{ background:#ffe4e9; color:#e11d48;}
+  .chip.waktu-subuh{ background:#e8e6fb; color:#4338ca;}
+  .chip.waktu-pagi{ background:#fff3da; color:#b8790a;}
+  .chip.waktu-siang{ background:#e0fbff; color:#0891b2;}
+  .chip.waktu-sore{ background:#ffe9da; color:#c2410c;}
+  .chip.waktu-malam{ background:#e2e0f5; color:#312e81;}
+
+  .empty-state{ text-align:center; padding:34px 10px; color:var(--ink-faint); font-size:13px;}
+
+  @media (max-width:980px){
+    .grid-2{ grid-template-columns:1fr; }
+    .sidebar{ display:none; }
+  }
+  @media (max-width:680px){
+    .kpi-grid{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="logo">PLN</div>
+      <div>
+        <div class="name">ULP Sekura</div>
+        <div class="sub">Kinerja Teknik</div>
+      </div>
+    </div>
+
+    <div class="sb-section-label">Menu</div>
+    <a class="sb-link" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+    <a class="sb-link" href="data-gardu.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>Data Gardu</a>
+
+    <a class="sb-link active" href="interruptions.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7l-1 8 11-12h-7l1-8z"/></svg>
+      Interruptions
+    </a>
+
+    <a class="sb-link" href="temuan-inspeksi.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Temuan Inspeksi</a>
+    <a class="sb-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Reports</a>
+
+    <div class="sb-section-label">Sub-menu Interruptions</div>
+    <a class="sb-link sub active" href="#trend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 3 5-6"/></svg>Trend Bulanan</a>
+    <a class="sb-link sub" href="#keypoint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>Per Keypoint</a>
+    <a class="sb-link sub" href="#log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Log Kejadian</a>
+
+    <div class="sb-foot">RAW DASHBOARD ARIES<br>Update terakhir: Jun 2026</div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <div class="topbar">
+      <div>
+        <h1>⚡ Interruptions</h1>
+        <p>Rekap gangguan jaringan</p>
+      </div>
+      <div class="topbar-right">
+        <div class="theme-toggle" id="themeToggle">
+          <button data-theme="light" class="active">☀️ Terang</button>
+          <button data-theme="dark">🌙 Gelap</button>
+        </div>
+        <div class="live"><span class="dot"></span><span id="clock">--:--:--</span></div>
+      </div>
+    </div>
+
+    <!-- ===== FILTER BAR ===== -->
+    <div class="filterbar">
+      <div class="f-group">
+        <label>Tahun</label>
+        <select id="yearFilter" class="dd">
+          <option value="2026" selected>2026</option>
+          <option value="2025">2025</option>
+        </select>
+      </div>
+
+      <div class="f-group">
+        <label>Kategori</label>
+        <div class="seg cat" id="catFilter">
+          <button data-cat="all" class="active all">Semua</button>
+          <button data-cat="lt5" class="lt5">Temporer &lt;5 menit</button>
+          <button data-cat="gt5" class="gt5">Permanen &gt;5 menit</button>
+        </div>
+      </div>
+
+      <div class="f-group" style="flex:1;">
+        <label>Bulan</label>
+        <div class="month-row" id="monthFilter">
+          <button data-m="-1" class="active">All</button>
+          <button data-m="0">Jan</button>
+          <button data-m="1">Feb</button>
+          <button data-m="2">Mar</button>
+          <button data-m="3">Apr</button>
+          <button data-m="4">Mei</button>
+          <button data-m="5">Jun</button>
+          <button data-m="6">Jul</button>
+          <button data-m="7">Agu</button>
+          <button data-m="8">Sep</button>
+          <button data-m="9">Okt</button>
+          <button data-m="10">Nov</button>
+          <button data-m="11">Des</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== KPI ===== -->
+    <div class="kpi-grid">
+      <div class="kpi total">
+        <div class="label">Total Interruptions</div>
+        <div class="value-row"><span class="value" id="kpiTotal">0</span><span class="unit">kali</span></div>
+        <div class="sub" id="kpiTotalSub">Tahun terpilih · semua kategori</div>
+        <svg class="spark" id="sparkTotal" viewBox="0 0 88 34" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="kpi lt5">
+        <div class="label">Temporer &lt;5 Menit</div>
+        <div class="value-row"><span class="value" id="kpiLt5">0</span><span class="unit">kali</span></div>
+        <div class="sub" id="kpiLt5Sub">% kontribusi —</div>
+        <svg class="spark" id="sparkLt5" viewBox="0 0 88 34" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="kpi gt5">
+        <div class="label">Permanen &gt;5 Menit</div>
+        <div class="value-row"><span class="value" id="kpiGt5">0</span><span class="unit">kali</span></div>
+        <div class="sub" id="kpiGt5Sub">% kontribusi —</div>
+        <svg class="spark" id="sparkGt5" viewBox="0 0 88 34" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="kpi yoy">
+        <div class="label">YoY vs Tahun Lalu</div>
+        <div class="value-row"><span class="value" id="kpiYoy">0%</span></div>
+        <div class="sub" id="kpiYoySub">Dibandingkan periode sama</div>
+      </div>
+    </div>
+
+    <!-- ===== TREND + DONUT ===== -->
+    <div class="grid-2" id="trend">
+      <div class="panel">
+        <div class="ph">
+          <h2>📈 Trend Trip Bulanan</h2>
+          <span class="tag" id="trendTag">2026 · Semua Kategori</span>
+        </div>
+        <div class="chart-wrap"><div id="trendChart" class="svg-chart"></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="ph">
+          <h2>Komposisi Kategori</h2>
+          <span class="tag" id="compTag">Temporer vs Permanen</span>
+        </div>
+        <div class="chart-wrap small"><div id="compChart" class="svg-chart"></div></div>
+      </div>
+    </div>
+
+    <!-- ===== PENYEBAB: INTERNAL VS EKSTERNAL ===== -->
+    <div class="panel-full" id="penyebab">
+      <div class="ph">
+        <h2>🔧 Penyebab Gangguan</h2>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <select id="causeMonthFilter" class="dd">
+            <option value="-1">Semua Bulan</option>
+            <option value="0">Januari</option>
+            <option value="1">Februari</option>
+            <option value="2">Maret</option>
+            <option value="3">April</option>
+            <option value="4">Mei</option>
+            <option value="5">Juni</option>
+            <option value="6">Juli</option>
+            <option value="7">Agustus</option>
+            <option value="8">September</option>
+            <option value="9">Oktober</option>
+            <option value="10">November</option>
+            <option value="11">Desember</option>
+          </select>
+        </div>
+      </div>
+      <p class="split-hint" style="text-align:left; padding:0; margin:-4px 0 12px;">Total interruption dipecah menjadi penyebab Internal Unit (gangguan dari sisi jaringan/aset sendiri) dan External Unit (gangguan dari luar, mis. pohon, layangan, layangan pihak ketiga).</p>
+      <div class="chart-wrap"><div id="causeChart" class="svg-chart"></div></div>
+      <div class="cause-summary">
+        <div class="cs-item">
+          <div class="cs-label">Total</div>
+          <div class="cs-value" id="causeTotalVal">0</div>
+        </div>
+        <div class="cs-item">
+          <div class="cs-label"><span class="legend-sq" style="background:#7c3aed"></span>Internal Unit</div>
+          <div class="cs-value" id="causeInternalVal">0</div>
+        </div>
+        <div class="cs-item">
+          <div class="cs-label"><span class="legend-sq" style="background:#f59e0b"></span>External Unit</div>
+          <div class="cs-value" id="causeExternalVal">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== WAKTU TRIP & CUACA (1 PANEL, KIRI-KANAN) ===== -->
+    <div class="panel-full" id="waktu">
+      <div class="ph">
+        <h2>🕐🌦️ Waktu Trip &amp; Cuaca</h2>
+        <span class="tag" id="waktuCuacaTag">Berdasarkan log kejadian 2026</span>
+      </div>
+      <div class="local-filter-row">
+        <div class="seg cat" id="waktuCatFilter">
+          <button data-cat="all" class="active all">All</button>
+          <button data-cat="lt5" class="lt5">&lt;5 menit</button>
+          <button data-cat="gt5" class="gt5">&gt;5 menit</button>
+        </div>
+      </div>
+      <div class="split-2col">
+        <div class="split-col">
+          <div class="split-label">⏱️ Distribusi Waktu Trip</div>
+          <p class="split-hint">Jumlah kejadian di setiap waktu (Subuh–Malam). Makin jauh titik dari tengah, makin sering trip terjadi di waktu itu — angka di setiap titik menunjukkan jumlah kejadian.</p>
+          <div class="chart-wrap small"><div id="radarChart" class="svg-chart"></div></div>
+        </div>
+        <div class="split-divider"></div>
+        <div class="split-col">
+          <div class="split-label">🌦️ Distribusi Cuaca</div>
+          <p class="split-hint">Jumlah kejadian saat Cerah vs Hujan. Garis lebih panjang/angka lebih besar = kejadian lebih sering pada cuaca tersebut.</p>
+          <div class="chart-wrap small"><div id="weatherChart" class="svg-chart"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PER KEYPOINT ===== -->
+    <div class="panel-full" id="keypoint">
+      <div class="ph">
+        <h2>📍 Rekap per Keypoint</h2>
+        <span class="tag" id="kpTag">Diurutkan dari total tertinggi</span>
+      </div>
+      <div class="local-filter-row">
+        <div class="seg cat" id="kpCatFilter">
+          <button data-cat="all" class="active all">All</button>
+          <button data-cat="lt5" class="lt5">&lt;5 menit</button>
+          <button data-cat="gt5" class="gt5">&gt;5 menit</button>
+        </div>
+        <input type="text" id="kpSearch" class="local-search" placeholder="🔍 Cari nama keypoint...">
+        <select id="kpSort" class="dd">
+          <option value="total-desc">Total: Tertinggi</option>
+          <option value="total-asc">Total: Terendah</option>
+          <option value="name-asc">Nama: A–Z</option>
+          <option value="name-desc">Nama: Z–A</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="kp">
+          <thead>
+            <tr>
+              <th>Keypoint</th>
+              <th class="num">Kategori</th>
+              <th class="num">Jan</th><th class="num">Feb</th><th class="num">Mar</th>
+              <th class="num">Apr</th><th class="num">Mei</th><th class="num">Jun</th>
+              <th class="num">Jul</th><th class="num">Agu</th><th class="num">Sep</th>
+              <th class="num">Okt</th><th class="num">Nov</th><th class="num">Des</th>
+              <th class="num">Total</th>
+              <th style="min-width:120px;">Proporsi</th>
+            </tr>
+          </thead>
+          <tbody id="kpBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== LOG KEJADIAN ===== -->
+    <div class="panel-full" id="log">
+      <div class="ph">
+        <h2>📋 Log Kejadian</h2>
+        <span class="tag" id="logTag">Detail per trip</span>
+      </div>
+      <p style="font-size:11.5px; color:var(--ink-faint); margin:-6px 0 12px;">Data trend &amp; rekap keypoint di panel lain adalah agregat bulanan dari sheet dan tidak memiliki rincian cuaca/waktu — rincian itu hanya tersedia di log kejadian ini (tahun 2026).</p>
+      <div class="local-filter-row">
+        <div class="seg cat" id="logCatFilter">
+          <button data-cat="all" class="active all">All</button>
+          <button data-cat="lt5" class="lt5">&lt;5 menit</button>
+          <button data-cat="gt5" class="gt5">&gt;5 menit</button>
+        </div>
+        <input type="text" id="logSearch" class="local-search" placeholder="🔍 Cari keypoint atau temuan...">
+        <select id="logSort" class="dd">
+          <option value="no-asc">No: Awal–Akhir</option>
+          <option value="no-desc">No: Akhir–Awal</option>
+          <option value="durasi-desc">Durasi: Terlama</option>
+          <option value="durasi-asc">Durasi: Tercepat</option>
+        </select>
+      </div>
+      <div class="log-scroll">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>No</th><th>Bulan</th><th>Keypoint</th><th>Tanggal</th>
+              <th>Jam Trip</th><th>Jam Normal</th><th>Durasi</th>
+              <th>Temuan</th><th>Cuaca</th><th>Waktu</th>
+            </tr>
+          </thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+const MONTHS_FULL = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+
+const TREND_TOTAL = {
+  2026: [4,1,5,6,4,2,0,0,0,0,0,0],
+  2025: [7,3,5,8,10,5,8,3,7,6,1,2]
+};
+const TREND_TEMPORER = {
+  2026: [3,1,5,2,4,2,0,0,0,0,0,0],
+  2025: [5,3,5,8,10,4,6,3,6,4,0,2]
+};
+const TREND_PERMANEN = {
+  2026: [1,0,0,4,0,0,0,0,0,0,0,0],
+  2025: [2,0,0,0,0,1,2,0,1,2,1,0]
+};
+
+const KEYPOINT_LT5 = {
+  2026: [
+    { name: "P. SUNGAI BARU EXTERNAL", values: [0,5,1,1,0,1,0,0,0,0,0,0], total: 8 },
+    { name: "P. SEKURA EXTERNAL",      values: [0,3,2,3,1,0,0,0,0,0,0,0], total: 9 },
+    { name: "P. SUNGAI BARU",          values: [1,0,0,2,1,0,0,0,0,0,0,0], total: 4 },
+    { name: "P. SEKURA",               values: [0,0,0,0,0,0,0,0,0,0,0,0], total: 0 },
+    { name: "RECLOSER PERIGI PARIT",   values: [0,1,4,0,2,1,0,0,0,0,0,0], total: 8 },
+    { name: "RECLOSER SEKUMBAK",       values: [0,0,0,0,0,0,0,0,0,0,0,0], total: 0 },
+    { name: "RECLOSER TANAH HITAM",    values: [1,0,1,0,3,2,0,0,0,0,0,0], total: 7 },
+    { name: "RECLOSER SASAK (TMJ)",    values: [1,0,0,0,0,0,0,0,0,0,0,0], total: 1 },
+    { name: "RECLOSER SASAK EXTERNAL", values: [2,8,4,4,0,2,0,0,0,0,0,0], total: 20 }
+  ],
+  2025: [
+    { name: "P. SUNGAI BARU EXTERNAL", values: [2,2,0,2,0,2,3,2,0,0,1,0], total: 14 },
+    { name: "P. SEKURA EXTERNAL",      values: [0,0,0,0,3,3,4,3,0,0,2,1], total: 16 },
+    { name: "P. SUNGAI BARU",          values: [1,0,0,0,0,0,0,0,1,1,0,0], total: 3 },
+    { name: "P. SEKURA",               values: [0,0,0,0,0,0,0,0,0,0,0,0], total: 0 },
+    { name: "RECLOSER PERIGI PARIT",   values: [3,2,2,4,4,3,3,0,3,0,0,1], total: 25 },
+    { name: "RECLOSER SEKUMBAK",       values: [0,0,1,1,0,0,1,0,2,2,0,0], total: 7 },
+    { name: "RECLOSER TANAH HITAM",    values: [0,1,2,3,5,1,2,3,0,1,0,1], total: 19 },
+    { name: "RECLOSER SASAK (TMJ)",    values: [0,0,0,0,1,0,0,0,0,0,0,0], total: 1 },
+    { name: "RECLOSER SASAK EXTERNAL", values: [3,0,1,4,2,5,3,0,0,7,5,4], total: 34 },
+    { name: "RECLOSER JEMBATAN BESI",  values: [1,0,0,0,0,0,0,0,0,0,0,0], total: 1 }
+  ]
+};
+
+const KEYPOINT_GT5 = {
+  2026: [
+    { name: "P. SUNGAI BARU EXTERNAL", values: [0,0,0,0,0,0,0,0,0,0,0,0], total: 0 },
+    { name: "P. SEKURA EXTERNAL",      values: [0,0,0,0,0,0,0,0,0,0,0,0], total: 0 },
+    { name: "P. SUNGAI BARU",          values: [0,0,0,0,0,0,0,0,0,0,0,0], total: 0 },
+    { name: "P. SEKURA",               values: [0,0,0,0,0,0,0,0,0,0,0,0], total: 0 },
+    { name: "RECLOSER PERIGI PARIT",   values: [1,0,0,3,0,0,0,0,0,0,0,0], total: 4 },
+    { name: "RECLOSER SEKUMBAK",       values: [0,0,0,1,1,0,0,0,0,0,0,0], total: 2 },
+    { name: "RECLOSER TANAH HITAM",    values: [0,0,0,0,0,0,0,0,0,0,0,0], total: 0 },
+    { name: "RECLOSER SASAK (TMJ)",    values: [0,0,0,0,0,0,0,0,0,0,0,0], total: 0 },
+    { name: "RECLOSER SASAK EXTERNAL", values: [0,0,0,1,2,0,0,0,0,0,0,0], total: 3 }
+  ],
+  2025: [
+    { name: "P. SUNGAI BARU EXTERNAL", values: [0,0,0,0,0,1,0,0,2,0,0,0], total: 3 },
+    { name: "P. SEKURA EXTERNAL",      values: [0,0,1,1,0,0,0,2,1,4,0,0], total: 9 },
+    { name: "P. SUNGAI BARU",          values: [0,0,0,0,0,0,0,0,0,0,0,0], total: 0 },
+    { name: "P. SEKURA",               values: [0,0,0,0,0,0,0,0,0,0,0,0], total: 0 },
+    { name: "RECLOSER PERIGI PARIT",   values: [1,0,0,0,0,1,1,0,0,2,1,0], total: 6 },
+    { name: "RECLOSER SEKUMBAK",       values: [0,0,0,0,0,0,1,0,1,0,0,0], total: 2 },
+    { name: "RECLOSER TANAH HITAM",    values: [1,0,0,0,0,0,0,0,0,0,0,0], total: 1 },
+    { name: "RECLOSER SASAK (TMJ)",    values: [0,0,0,0,0,0,0,0,0,0,0,0], total: 0 },
+    { name: "RECLOSER SASAK EXTERNAL", values: [2,1,1,1,3,0,0,1,2,0,1,0], total: 12 },
+    { name: "RECLOSER JEMBATAN BESI",  values: [0,0,0,0,0,0,0,0,0,0,0,0], total: 0 }
+  ]
+};
+
+// -------------------------------------------------------------
+// PENYEBAB: TRIP INTERNAL UNIT vs TRIP EXTERNAL UNIT
+// (baris khusus pada sheet, per kategori & tahun)
+// -------------------------------------------------------------
+const CAUSE_DATA = {
+  lt5: {
+    2026: { internal: [3,1,5,2,6,3,0,0,0,0,0,0], external: [2,16,7,8,1,3,0,0,0,0,0,0] },
+    2025: { internal: [5,3,5,8,10,4,6,3,6,4,0,2], external: [5,2,1,6,5,10,10,5,0,7,8,5] }
+  },
+  gt5: {
+    2026: { internal: [1,0,0,4,1,0,0,0,0,0,0,0], external: [0,0,0,1,2,0,0,0,0,0,0,0] },
+    2025: { internal: [2,0,0,0,0,1,2,0,1,2,1,0], external: [2,1,2,2,3,1,0,3,5,4,1,0] }
+  }
+};
+function causeTotals(cat, year){
+  if(cat === "all"){
+    const a = CAUSE_DATA.lt5[year], b = CAUSE_DATA.gt5[year];
+    return {
+      internal: a.internal.map((v,i)=> v + b.internal[i]),
+      external: a.external.map((v,i)=> v + b.external[i])
+    };
+  }
+  return CAUSE_DATA[cat][year];
+}
+
+
+const TRIP_LOG = [
+  { no:1, bulanIdx:0, keypoint:"RECLOSER SASAK ( TMJ )", durasi:1, tanggal:"07/01/2026", trip:"05:48", normal:"05:49", temuan:"Pohon tumbang, SUTM lepas dari isolator 1 phasa", cuaca:"Hujan", waktu:"Subuh" },
+  { no:2, bulanIdx:0, keypoint:"RECLOSER PERIGI PARIT", durasi:41, tanggal:"08/01/2026", trip:"17:32", normal:"18:13", temuan:"Daun kelapa nempel ke isolator", cuaca:"Hujan", waktu:"Sore" },
+  { no:3, bulanIdx:0, keypoint:"RECLOSER TANAH HITAM", durasi:1, tanggal:"13/01/2026", trip:"07:41", normal:"07:42", temuan:"Gangguan tidak jelas", cuaca:"Cerah", waktu:"Pagi" },
+  { no:4, bulanIdx:0, keypoint:"P. SUNGAI BARU", durasi:3, tanggal:"23/01/2026", trip:"23:38", normal:"23:41", temuan:"Gangguan tidak jelas", cuaca:"Hujan", waktu:"Malam" },
+  { no:5, bulanIdx:1, keypoint:"RECLOSER PERIGI PARIT", durasi:2, tanggal:"06/02/2026", trip:"08:04", normal:"08:06", temuan:"Gangguan tidak jelas", cuaca:"Hujan", waktu:"Pagi" },
+  { no:6, bulanIdx:2, keypoint:"RECLOSER PERIGI PARIT", durasi:1, tanggal:"03/03/2026", trip:"06:25", normal:"06:26", temuan:"Gangguan tidak jelas", cuaca:"Hujan", waktu:"Pagi" },
+  { no:7, bulanIdx:2, keypoint:"RECLOSER PERIGI PARIT", durasi:4, tanggal:"04/03/2026", trip:"07:26", normal:"07:30", temuan:"Daun palem terbang ke TM", cuaca:"Cerah", waktu:"Pagi" },
+  { no:8, bulanIdx:2, keypoint:"RECLOSER PERIGI PARIT", durasi:1, tanggal:"27/03/2026", trip:"06:24", normal:"06:25", temuan:"Clamp traves keropos", cuaca:"Cerah", waktu:"Pagi" },
+  { no:9, bulanIdx:2, keypoint:"RECLOSER PERIGI PARIT", durasi:2, tanggal:"30/03/2026", trip:"01:56", normal:"01:58", temuan:"Gangguan tidak jelas", cuaca:"Cerah", waktu:"Subuh" },
+  { no:10, bulanIdx:2, keypoint:"RECLOSER TANAH HITAM", durasi:1, tanggal:"22/03/2026", trip:"07:14", normal:"07:15", temuan:"Gangguan tidak jelas", cuaca:"Cerah", waktu:"Pagi" },
+  { no:11, bulanIdx:3, keypoint:"P. SUNGAI BARU", durasi:2, tanggal:"02/04/2026", trip:"09:44", normal:"09:46", temuan:"Layangan", cuaca:"Cerah", waktu:"Pagi" },
+  { no:12, bulanIdx:3, keypoint:"P. SUNGAI BARU", durasi:1, tanggal:"07/04/2026", trip:"14:48", normal:"14:49", temuan:"Kabel rantas", cuaca:"Hujan", waktu:"Siang" },
+  { no:13, bulanIdx:3, keypoint:"RECLOSER PERIGI PARIT", durasi:59, tanggal:"11/04/2026", trip:"15:47", normal:"16:46", temuan:"Pohon tumbang ke jaringan", cuaca:"Cerah", waktu:"Sore" },
+  { no:14, bulanIdx:3, keypoint:"RECLOSER PERIGI PARIT", durasi:110, tanggal:"12/04/2026", trip:"11:44", normal:"13:34", temuan:"Pohon tumbang ke jaringan", cuaca:"Hujan", waktu:"Siang" },
+  { no:15, bulanIdx:3, keypoint:"RECLOSER SEKUMBAK", durasi:31, tanggal:"12/04/2026", trip:"11:25", normal:"11:56", temuan:"Ranting pohon kena ke jaringan", cuaca:"Hujan", waktu:"Siang" },
+  { no:16, bulanIdx:3, keypoint:"RECLOSER PERIGI PARIT", durasi:255, tanggal:"18/04/2026", trip:"16:21", normal:"20:36", temuan:"Clamp traves keropos", cuaca:"Cerah", waktu:"Sore" },
+  { no:17, bulanIdx:4, keypoint:"P. SUNGAI BARU", durasi:4, tanggal:"01/05/2026", trip:"17:54", normal:"17:58", temuan:"Gangguan tidak jelas", cuaca:"Hujan", waktu:"Sore" },
+  { no:18, bulanIdx:4, keypoint:"RECLOSER TANAH HITAM", durasi:1, tanggal:"12/05/2026", trip:"01:08", normal:"01:09", temuan:"Gangguan tidak jelas", cuaca:"Cerah", waktu:"Subuh" },
+  { no:19, bulanIdx:4, keypoint:"RECLOSER TANAH HITAM", durasi:1, tanggal:"13/05/2026", trip:"14:36", normal:"14:37", temuan:"Gangguan tidak jelas", cuaca:"Cerah", waktu:"Siang" },
+  { no:20, bulanIdx:4, keypoint:"RECLOSER PERIGI PARIT", durasi:1, tanggal:"22/05/2026", trip:"05:22", normal:"05:23", temuan:"Ranting pohon kena ke jaringan", cuaca:"Cerah", waktu:"Subuh" },
+  { no:21, bulanIdx:4, keypoint:"RECLOSER TANAH HITAM", durasi:1, tanggal:"27/05/2026", trip:"18:11", normal:"18:12", temuan:"Layangan nempel di TM", cuaca:"Cerah", waktu:"Malam" },
+  { no:22, bulanIdx:4, keypoint:"RECLOSER PERIGI PARIT", durasi:1, tanggal:"29/05/2026", trip:"06:40", normal:"06:41", temuan:"Gangguan tidak jelas", cuaca:"Cerah", waktu:"Pagi" },
+  { no:23, bulanIdx:4, keypoint:"RECLOSER SEKUMBAK", durasi:114, tanggal:"29/05/2026", trip:"15:08", normal:"17:02", temuan:"Atap seng kena ke TM", cuaca:"Hujan", waktu:"Sore" },
+  { no:24, bulanIdx:5, keypoint:"RECLOSER PERIGI PARIT", durasi:1, tanggal:"03/06/2026", trip:"06:41", normal:"06:42", temuan:"Gangguan tidak jelas", cuaca:"Cerah", waktu:"Pagi" },
+  { no:25, bulanIdx:5, keypoint:"RECLOSER TANAH HITAM", durasi:1, tanggal:"07/06/2026", trip:"12:24", normal:"12:25", temuan:"Trip bersamaan petir", cuaca:"Hujan", waktu:"Siang" },
+  { no:26, bulanIdx:5, keypoint:"RECLOSER TANAH HITAM", durasi:1, tanggal:"14/06/2026", trip:"15:56", normal:"15:57", temuan:"Gangguan tidak jelas", cuaca:"Cerah", waktu:"Sore" }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let state = { year: 2026, cat: "all", month: -1 };
+let localState = { kpSearch: "", kpSort: "total-desc", logSearch: "", logDurasi: "all", logSort: "no-asc", causeMonth: -1, kpCat: "all", logCat: "all", waktuCat: "all" };
+// ============================================================
+// HELPERS (state, KPI, sparkline)
+// ============================================================
+function sum(arr){ return arr.reduce((a,b)=>a+(b||0),0); }
+
+function getKeypointData(cat){
+  cat = cat || state.cat;
+  if(cat === "lt5") return KEYPOINT_LT5[state.year] || [];
+  if(cat === "gt5") return KEYPOINT_GT5[state.year] || [];
+  const lt5 = KEYPOINT_LT5[state.year] || [];
+  const gt5 = KEYPOINT_GT5[state.year] || [];
+  const map = {};
+  lt5.forEach(k=>{
+    map[k.name] = map[k.name] || {name:k.name, values:Array(12).fill(0), total:0, hasLt5:false, hasGt5:false};
+    map[k.name].values = map[k.name].values.map((v,i)=> v + (k.values[i]||0));
+    map[k.name].total += k.total; map[k.name].hasLt5 = true;
+  });
+  gt5.forEach(k=>{
+    map[k.name] = map[k.name] || {name:k.name, values:Array(12).fill(0), total:0, hasLt5:false, hasGt5:false};
+    map[k.name].values = map[k.name].values.map((v,i)=> v + (k.values[i]||0));
+    map[k.name].total += k.total; map[k.name].hasGt5 = true;
+  });
+  return Object.values(map);
+}
+
+function monthLabel(){
+  if(state.month === -1) return "Semua Bulan";
+  return MONTHS_FULL[state.month];
+}
+function catLabel(){
+  if(state.cat === "lt5") return "Temporer <5 Menit";
+  if(state.cat === "gt5") return "Permanen >5 Menit";
+  return "Semua Kategori";
+}
+
+// ============================================================
+// SPARKLINE (mini SVG polyline di KPI card)
+// ============================================================
+function drawSpark(svgId, arr, color){
+  const svg = document.getElementById(svgId);
+  if(!svg) return;
+  const w = 88, h = 34, pad = 3;
+  const max = Math.max(...arr, 1);
+  const step = (w - pad*2) / (arr.length - 1 || 1);
+  const pts = arr.map((v,i)=>{
+    const x = pad + i*step;
+    const y = h - pad - (v/max)*(h - pad*2);
+    return [x,y];
+  });
+  const pathD = pts.map((p,i)=> (i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+  const areaD = pathD + ` L${pts[pts.length-1][0].toFixed(1)},${h} L${pts[0][0].toFixed(1)},${h} Z`;
+  svg.innerHTML = `
+    <path d="${areaD}" fill="${color}" opacity="0.25"></path>
+    <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    ${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="1.6" fill="${color}"></circle>`).join("")}
+  `;
+}
+
+// ============================================================
+// RENDER: KPI
+// ============================================================
+function renderKPI(){
+  const y = state.year;
+  const totalArr = TREND_TOTAL[y] || Array(12).fill(0);
+  const lt5Arr = TREND_TEMPORER[y] || Array(12).fill(0);
+  const gt5Arr = TREND_PERMANEN[y] || Array(12).fill(0);
+
+  const slice = (arr)=> state.month === -1 ? arr : [arr[state.month]];
+
+  const total = sum(slice(totalArr));
+  const lt5 = sum(slice(lt5Arr));
+  const gt5 = sum(slice(gt5Arr));
+
+  document.getElementById("kpiTotal").textContent = total;
+  document.getElementById("kpiLt5").textContent = lt5;
+  document.getElementById("kpiGt5").textContent = gt5;
+  document.getElementById("kpiTotalSub").textContent = `${y} · ${monthLabel()}`;
+  document.getElementById("kpiLt5Sub").textContent = total ? `${((lt5/total)*100).toFixed(0)}% dari total` : "Tidak ada data";
+  document.getElementById("kpiGt5Sub").textContent = total ? `${((gt5/total)*100).toFixed(0)}% dari total` : "Tidak ada data";
+
+  drawSpark("sparkTotal", totalArr, "#ffffff");
+  drawSpark("sparkLt5", lt5Arr, "#ffffff");
+  drawSpark("sparkGt5", gt5Arr, "#ffffff");
+
+  const otherYear = y === 2026 ? 2025 : 2026;
+  const otherArr = TREND_TOTAL[otherYear] || Array(12).fill(0);
+  const otherTotal = sum(slice(otherArr));
+  let yoyText = "—";
+  if(otherTotal > 0){
+    const pct = ((total - otherTotal)/otherTotal)*100;
+    yoyText = (pct>=0?"+":"") + pct.toFixed(0) + "%";
+  } else if (total > 0) {
+    yoyText = "Baru";
+  }
+  document.getElementById("kpiYoy").textContent = yoyText;
+  document.getElementById("kpiYoySub").textContent = `${y} (${total}) vs ${otherYear} (${otherTotal}) · ${monthLabel()}`;
+}
+
+// ============================================================
+// SVG CHART HELPERS (tanpa dependency eksternal)
+// ============================================================
+function svgEl(tag, attrs){
+  const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for(const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+function makeTooltip(container){
+  let tip = container.querySelector(".svg-tip");
+  if(!tip){
+    tip = document.createElement("div");
+    tip.className = "svg-tip";
+    container.appendChild(tip);
+  }
+  return tip;
+}
+function showTip(container, x, y, html){
+  const tip = makeTooltip(container);
+  tip.innerHTML = html;
+  tip.style.left = x + "px";
+  tip.style.top = y + "px";
+  tip.classList.add("show");
+}
+function hideTip(container){
+  const tip = container.querySelector(".svg-tip");
+  if(tip) tip.classList.remove("show");
+}
+
+// ============================================================
+// LINE/AREA CHART (Trend Trip Bulanan)
+// ============================================================
+function renderTrendChart(){
+  const y = state.year;
+  const container = document.getElementById("trendChart");
+  container.innerHTML = "";
+
+  let series = [];
+  if(state.cat === "all"){
+    series = [
+      { label:"Temporer <5 menit", data: TREND_TEMPORER[y], color:"#06b6d4", colorSoft:"rgba(34,211,238,.32)" },
+      { label:"Permanen >5 menit", data: TREND_PERMANEN[y], color:"#f43f5e", colorSoft:"rgba(244,63,94,.28)" }
+    ];
+  } else if(state.cat === "lt5"){
+    series = [{ label:"Temporer <5 menit", data: TREND_TEMPORER[y], color:"#06b6d4", colorSoft:"rgba(34,211,238,.38)" }];
+  } else {
+    series = [{ label:"Permanen >5 menit", data: TREND_PERMANEN[y], color:"#f43f5e", colorSoft:"rgba(244,63,94,.32)" }];
+  }
+
+  document.getElementById("trendTag").textContent = `${y} · ${catLabel()}`;
+
+  // legend
+  const legend = document.createElement("div");
+  legend.className = "svg-legend";
+  legend.innerHTML = series.map(s=> `<span><span class="legend-dot" style="background:${s.color}"></span>${s.label}</span>`).join("");
+  container.appendChild(legend);
+
+  const W = 600, H = 230, padL = 30, padR = 12, padT = 10, padB = 26;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const allVals = series.flatMap(s=>s.data);
+  const maxVal = Math.max(...allVals, 1);
+  const niceMax = Math.ceil(maxVal*1.15) || 1;
+  const n = MONTHS_SHORT.length;
+  const xPos = i => padL + (innerW * i/(n-1));
+  const yPos = v => padT + innerH - (v/niceMax)*innerH;
+
+  const svg = svgEl("svg", { viewBox:`0 0 ${W} ${H}`, preserveAspectRatio:"none" });
+
+  // grid lines (horizontal, 4 steps)
+  const steps = 4;
+  for(let s=0; s<=steps; s++){
+    const v = (niceMax/steps)*s;
+    const gy = yPos(v);
+    svg.appendChild(svgEl("line", { x1:padL, x2:W-padR, y1:gy, y2:gy, stroke:"#f3f1fc", "stroke-width":1 }));
+    const t = svgEl("text", { x:4, y:gy+3, "font-size":9, fill:"#a8a3c4", "font-family":"Plus Jakarta Sans" });
+    t.textContent = Math.round(v);
+    svg.appendChild(t);
+  }
+  // x labels
+  MONTHS_SHORT.forEach((m,i)=>{
+    const t = svgEl("text", { x:xPos(i), y:H-6, "font-size":9.5, fill:"#6b6489", "font-weight":600, "text-anchor":"middle", "font-family":"Plus Jakarta Sans" });
+    t.textContent = m;
+    svg.appendChild(t);
+  });
+
+  series.forEach(s=>{
+    const pts = s.data.map((v,i)=> [xPos(i), yPos(v)]);
+    const lineD = pts.map((p,i)=> (i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+    const areaD = lineD + ` L${pts[pts.length-1][0].toFixed(1)},${padT+innerH} L${pts[0][0].toFixed(1)},${padT+innerH} Z`;
+    svg.appendChild(svgEl("path", { d:areaD, fill:s.colorSoft, stroke:"none" }));
+    svg.appendChild(svgEl("path", { d:lineD, fill:"none", stroke:s.color, "stroke-width":2.5, "stroke-linecap":"round", "stroke-linejoin":"round" }));
+
+    pts.forEach((p,i)=>{
+      const isSel = i === state.month;
+      const c = svgEl("circle", { cx:p[0], cy:p[1], r: isSel?6:3.5, fill:s.color, stroke:"#fff", "stroke-width":2, class:"svg-pt" });
+      c.addEventListener("mouseenter", ()=> showTip(container, p[0]/W*container.clientWidth, p[1]/H*container.clientHeight, `<b>${MONTHS_SHORT[i]}</b> · ${s.label}: ${s.data[i]}`));
+      c.addEventListener("mouseleave", ()=> hideTip(container));
+      svg.appendChild(c);
+    });
+  });
+
+  container.appendChild(svg);
+}
+
+// ============================================================
+// GROUPED BAR CHART (Penyebab Internal vs External)
+// ============================================================
+function renderCauseChart(){
+  const y = state.year;
+  const cause = causeTotals(state.cat, y);
+  const container = document.getElementById("causeChart");
+  container.innerHTML = "";
+
+  // filter bulan lokal khusus panel ini (independen dari filter global "Bulan")
+  const selMonth = localState.causeMonth;
+  const months = selMonth === -1 ? [...Array(12).keys()] : [selMonth];
+  const labels = months.map(i=> MONTHS_SHORT[i]);
+  const internalArr = months.map(i=> cause.internal[i]||0);
+  const externalArr = months.map(i=> cause.external[i]||0);
+
+  const internalTotal = sum(internalArr);
+  const externalTotal = sum(externalArr);
+  const grandTotal = internalTotal + externalTotal;
+
+  document.getElementById("causeInternalVal").textContent = internalTotal;
+  document.getElementById("causeExternalVal").textContent = externalTotal;
+  document.getElementById("causeTotalVal").textContent = grandTotal;
+
+  const legend = document.createElement("div");
+  legend.className = "svg-legend";
+  legend.innerHTML = `<span><span class="legend-sq" style="background:#7c3aed"></span>Internal Unit</span><span><span class="legend-sq" style="background:#f59e0b"></span>External Unit</span>`;
+  container.appendChild(legend);
+
+  const n = labels.length;
+  const W = 600, H = 230, padL = 30, padR = 14, padT = 14, padB = 26;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const stackTotals = months.map((mi,idx)=> internalArr[idx] + externalArr[idx]);
+  const maxStack = Math.max(...stackTotals, 1);
+  const niceMax = Math.ceil(maxStack*1.18) || 1;
+  const xPos = i => n===1 ? padL+innerW/2 : padL + innerW*i/(n-1);
+  const yPos = v => padT + innerH - (v/niceMax)*innerH;
+
+  const svg = svgEl("svg", { viewBox:`0 0 ${W} ${H}`, preserveAspectRatio:"none" });
+
+  // grid
+  const steps = 4;
+  for(let s=0; s<=steps; s++){
+    const v = (niceMax/steps)*s;
+    const gy = yPos(v);
+    svg.appendChild(svgEl("line", { x1:padL, x2:W-padR, y1:gy, y2:gy, stroke:"#f3f1fc", "stroke-width":1 }));
+    const t = svgEl("text", { x:2, y:gy+3, "font-size":9, fill:"#a8a3c4", "font-family":"Plus Jakarta Sans" });
+    t.textContent = v.toFixed(1);
+    svg.appendChild(t);
+  }
+  labels.forEach((m,i)=>{
+    const t = svgEl("text", { x:xPos(i), y:H-6, "font-size":9.5, fill:"#6b6489", "font-weight":600, "text-anchor":"middle", "font-family":"Plus Jakarta Sans" });
+    t.textContent = m;
+    svg.appendChild(t);
+  });
+
+  if(n === 1){
+    // single month: tampilkan sebagai 1 batang area lebar (mirip Image 1: Participation Overview)
+    const barW = Math.min(innerW*0.5, 220);
+    const bx = xPos(0) - barW/2;
+    const vi = internalArr[0], ve = externalArr[0];
+    const hi = (vi/niceMax)*innerH, he = (ve/niceMax)*innerH;
+    const topI = padT+innerH-hi;
+    const topE = topI-he;
+
+    const rInt = svgEl("rect", { x:bx, y:topI, width:barW, height:Math.max(hi,0), fill:"#7c3aed" });
+    svg.appendChild(rInt);
+    const rExt = svgEl("rect", { x:bx, y:Math.max(topE,padT), width:barW, height:Math.max(he,0), fill:"#f59e0b" });
+    svg.appendChild(rExt);
+
+    if(vi>0){
+      const lt = svgEl("text", { x:bx+barW/2, y:(topI+padT+innerH)/2+4, "text-anchor":"middle", "font-size":13, "font-weight":800, fill:"#fff", "font-family":"Space Grotesk" });
+      lt.textContent = vi;
+      svg.appendChild(lt);
+    }
+    if(ve>0){
+      const lt2 = svgEl("text", { x:bx+barW/2, y:(topE+topI)/2+4, "text-anchor":"middle", "font-size":11, "font-weight":800, fill:"#fff", "font-family":"Space Grotesk" });
+      lt2.textContent = ve;
+      svg.appendChild(lt2);
+    }
+  } else {
+    // semua bulan: stacked area chart
+    const baseline = padT+innerH;
+    const internalTop = months.map((mi,i)=> baseline - (internalArr[i]/niceMax)*innerH);
+    const stackTop = months.map((mi,i)=> baseline - (stackTotals[i]/niceMax)*innerH);
+
+    const ptsBase = months.map((mi,i)=> [xPos(i), baseline]);
+    const ptsInt = months.map((mi,i)=> [xPos(i), internalTop[i]]);
+    const ptsStack = months.map((mi,i)=> [xPos(i), stackTop[i]]);
+
+    // area internal (bawah)
+    const dInt = ptsInt.map((p,i)=>(i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")
+      + ` L${ptsBase[ptsBase.length-1][0].toFixed(1)},${ptsBase[ptsBase.length-1][1]} L${ptsBase[0][0].toFixed(1)},${ptsBase[0][1]} Z`;
+    svg.appendChild(svgEl("path", { d:dInt, fill:"#7c3aed", "fill-opacity":0.85 }));
+
+    // area external (atas, ditumpuk di atas internal)
+    const dExt = ptsStack.map((p,i)=>(i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")
+      + " " + ptsInt.slice().reverse().map(p=>"L"+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ") + " Z";
+    svg.appendChild(svgEl("path", { d:dExt, fill:"#f59e0b", "fill-opacity":0.85 }));
+
+    // garis tepi
+    const lineInt = ptsInt.map((p,i)=>(i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+    svg.appendChild(svgEl("path", { d:lineInt, fill:"none", stroke:"#5b21b6", "stroke-width":1.5 }));
+    const lineStack = ptsStack.map((p,i)=>(i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+    svg.appendChild(svgEl("path", { d:lineStack, fill:"none", stroke:"#b45309", "stroke-width":1.5 }));
+
+    // hover points
+    months.forEach((mi,i)=>{
+      const c1 = svgEl("circle", { cx:ptsInt[i][0], cy:ptsInt[i][1], r:3.5, fill:"#7c3aed", stroke:"#fff", "stroke-width":1.4, class:"svg-pt" });
+      c1.addEventListener("mouseenter", ()=> showTip(container, ptsInt[i][0]/W*container.clientWidth, ptsInt[i][1]/H*container.clientHeight, `<b>${labels[i]}</b> · Internal: ${internalArr[i]}`));
+      c1.addEventListener("mouseleave", ()=> hideTip(container));
+      svg.appendChild(c1);
+
+      const c2 = svgEl("circle", { cx:ptsStack[i][0], cy:ptsStack[i][1], r:3.5, fill:"#f59e0b", stroke:"#fff", "stroke-width":1.4, class:"svg-pt" });
+      c2.addEventListener("mouseenter", ()=> showTip(container, ptsStack[i][0]/W*container.clientWidth, ptsStack[i][1]/H*container.clientHeight, `<b>${labels[i]}</b> · External: ${externalArr[i]}`));
+      c2.addEventListener("mouseleave", ()=> hideTip(container));
+      svg.appendChild(c2);
+    });
+  }
+
+  container.appendChild(svg);
+}
+
+// ============================================================
+// DONUT CHART (Komposisi Kategori)
+// ============================================================
+function donutPath(cx, cy, rOuter, rInner, startAngle, endAngle){
+  const a0 = startAngle - Math.PI/2, a1 = endAngle - Math.PI/2;
+  const x0 = cx + rOuter*Math.cos(a0), y0 = cy + rOuter*Math.sin(a0);
+  const x1 = cx + rOuter*Math.cos(a1), y1 = cy + rOuter*Math.sin(a1);
+  const x2 = cx + rInner*Math.cos(a1), y2 = cy + rInner*Math.sin(a1);
+  const x3 = cx + rInner*Math.cos(a0), y3 = cy + rInner*Math.sin(a0);
+  const large = (endAngle-startAngle) > Math.PI ? 1 : 0;
+  return `M${x0},${y0} A${rOuter},${rOuter} 0 ${large} 1 ${x1},${y1} L${x2},${y2} A${rInner},${rInner} 0 ${large} 0 ${x3},${y3} Z`;
+}
+
+function renderCompChart(){
+  const y = state.year;
+  const slice = (arr)=> state.month === -1 ? sum(arr) : (arr[state.month]||0);
+  const lt5 = slice(TREND_TEMPORER[y] || Array(12).fill(0));
+  const gt5 = slice(TREND_PERMANEN[y] || Array(12).fill(0));
+  document.getElementById("compTag").textContent = `${y} · ${monthLabel()}`;
+
+  const container = document.getElementById("compChart");
+  container.innerHTML = "";
+
+  if(lt5 === 0 && gt5 === 0) return;
+
+  const legend = document.createElement("div");
+  legend.className = "svg-legend center";
+  legend.innerHTML = `<span><span class="legend-dot" style="background:#06b6d4"></span>Temporer &lt;5 menit (${lt5})</span><span><span class="legend-dot" style="background:#f43f5e"></span>Permanen &gt;5 menit (${gt5})</span>`;
+  container.appendChild(legend);
+
+  const total = lt5+gt5;
+  const W = 280, H = 200, cx = W/2, cy = H/2+4, rOuter = 78, rInner = 50;
+  const svg = svgEl("svg", { viewBox:`0 0 ${W} ${H}` });
+
+  let angle = 0;
+  const parts = [
+    { v:lt5, color:"#06b6d4", label:"Temporer <5 menit" },
+    { v:gt5, color:"#f43f5e", label:"Permanen >5 menit" }
+  ];
+  parts.forEach(p=>{
+    if(p.v === 0) return;
+    const frac = p.v/total;
+    const a0 = angle, a1 = angle + frac*Math.PI*2;
+    const path = svgEl("path", { d: donutPath(cx,cy,rOuter,rInner,a0,a1), fill:p.color, stroke:"#fff", "stroke-width":3, class:"svg-pt" });
+    path.addEventListener("mouseenter", e=>{
+      const rect = container.getBoundingClientRect();
+      showTip(container, cx, cy-rOuter-8, `<b>${p.label}</b>: ${p.v} (${(frac*100).toFixed(0)}%)`);
+    });
+    path.addEventListener("mouseleave", ()=> hideTip(container));
+    svg.appendChild(path);
+    angle = a1;
+  });
+
+  const t1 = svgEl("text", { x:cx, y:cy-4, "text-anchor":"middle", "font-size":24, "font-weight":700, fill:"#1b1133", "font-family":"Space Grotesk" });
+  t1.textContent = total;
+  svg.appendChild(t1);
+  const t2 = svgEl("text", { x:cx, y:cy+14, "text-anchor":"middle", "font-size":9.5, "font-weight":700, fill:"#a8a3c4", "font-family":"Plus Jakarta Sans" });
+  t2.textContent = "TOTAL TRIP";
+  svg.appendChild(t2);
+
+  container.appendChild(svg);
+}
+
+// ============================================================
+// RADAR / STACKED POLYGON CHART (generik untuk Waktu Trip & Cuaca)
+// ============================================================
+function renderRadarSVG(containerId, labels, datasetsArr){
+  // datasetsArr: [{label, data:[...], color}]
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+
+  const legend = document.createElement("div");
+  legend.className = "svg-legend";
+  legend.innerHTML = datasetsArr.map(d=> `<span><span class="legend-dot" style="background:${d.color}"></span>${d.label}</span>`).join("");
+  container.appendChild(legend);
+
+  const maxVal = Math.max(...datasetsArr.flatMap(d=>d.data), 1);
+  const niceMax = Math.max(Math.ceil(maxVal), 2);
+  const n = labels.length;
+  // untuk sumbu sedikit (n<=2, mis. cuaca), beri padding lebih besar supaya label & angka tidak terpotong
+  const W = 320, H = 230, cx = W/2, cy = H/2 + 6;
+  const padding = n <= 2 ? 56 : 36;
+  const R = Math.min(W,H)/2 - padding;
+
+  const angleFor = i => (Math.PI*2*i/n) - Math.PI/2;
+  const pointFor = (i, v) => {
+    const a = angleFor(i);
+    const r = (v/niceMax)*R;
+    return [cx + r*Math.cos(a), cy + r*Math.sin(a)];
+  };
+
+  const svg = svgEl("svg", { viewBox:`0 0 ${W} ${H}` });
+
+  // grid rings + angka skala di sumbu atas
+  const rings = 3;
+  for(let ring=1; ring<=rings; ring++){
+    const rr = R*ring/rings;
+    const pts = labels.map((_,i)=>{
+      const a = angleFor(i);
+      return [cx+rr*Math.cos(a), cy+rr*Math.sin(a)];
+    });
+    const d = pts.map((p,i)=> (i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")+" Z";
+    svg.appendChild(svgEl("path", { d, fill:"none", stroke:"#ece9fb", "stroke-width":1 }));
+    // angka skala (nilai ring ini) ditaruh di sumbu pertama (atas)
+    const ringVal = Math.round(niceMax*ring/rings);
+    const rt = svgEl("text", { x:cx+9, y:cy-rr-2, "font-size":8, fill:"#c4befa", "font-weight":700, "font-family":"Plus Jakarta Sans" });
+    rt.textContent = ringVal;
+    svg.appendChild(rt);
+  }
+  // axis lines + labels
+  labels.forEach((lab,i)=>{
+    const a = angleFor(i);
+    const ex = cx+R*Math.cos(a), ey = cy+R*Math.sin(a);
+    svg.appendChild(svgEl("line", { x1:cx, y1:cy, x2:ex, y2:ey, stroke:"#ece9fb", "stroke-width":1 }));
+    const labelDist = n <= 2 ? R+30 : R+20;
+    const lx = cx+labelDist*Math.cos(a), ly = cy+labelDist*Math.sin(a);
+    // anchor adaptif: kalau titik label condong ke kanan pakai "start", ke kiri pakai "end", tengah pakai "middle"
+    const cosA = Math.cos(a);
+    let anchor = "middle";
+    if(cosA > 0.35) anchor = "start";
+    else if(cosA < -0.35) anchor = "end";
+    const t = svgEl("text", { x:lx, y:ly, "text-anchor":anchor, "dominant-baseline":"middle", "font-size":11, "font-weight":700, fill:"#1b1133", "font-family":"Plus Jakarta Sans" });
+    t.textContent = lab;
+    svg.appendChild(t);
+  });
+
+  // datasets polygons + value label di setiap titik
+  datasetsArr.forEach((ds, dsIdx)=>{
+    const pts = ds.data.map((v,i)=> pointFor(i,v));
+    const d = pts.map((p,i)=> (i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")+" Z";
+    svg.appendChild(svgEl("path", { d, fill:ds.color, "fill-opacity":0.22, stroke:ds.color, "stroke-width":2.2 }));
+    pts.forEach((p,i)=>{
+      const c = svgEl("circle", { cx:p[0], cy:p[1], r:4, fill:ds.color, stroke:"#fff", "stroke-width":1.6, class:"svg-pt" });
+      c.addEventListener("mouseenter", ()=> showTip(container, p[0]/W*container.clientWidth, p[1]/H*container.clientHeight, `<b>${labels[i]}</b> · ${ds.label}: ${ds.data[i]}`));
+      c.addEventListener("mouseleave", ()=> hideTip(container));
+      svg.appendChild(c);
+
+      // value label kecil di samping titik, hanya kalau nilainya > 0
+      if(ds.data[i] > 0){
+        let lx, ly;
+        if(n <= 2){
+          // untuk sumbu vertikal (cuaca): geser murni horizontal kiri/kanan agar tidak tumpuk
+          const dx = dsIdx===0 ? -13 : 13;
+          lx = p[0] + dx;
+          ly = p[1];
+        } else {
+          const a = angleFor(i);
+          const offsetR = 11;
+          const offsetAngle = a + (dsIdx===0 ? -0.22 : 0.22);
+          lx = p[0] + offsetR*Math.cos(offsetAngle);
+          ly = p[1] + offsetR*Math.sin(offsetAngle);
+        }
+        const bg = svgEl("circle", { cx:lx, cy:ly, r:7.5, fill:"#fff", stroke:ds.color, "stroke-width":1.3 });
+        svg.appendChild(bg);
+        const vt = svgEl("text", { x:lx, y:ly+0.5, "text-anchor":"middle", "dominant-baseline":"middle", "font-size":8.5, "font-weight":800, fill:ds.color, "font-family":"Plus Jakarta Sans" });
+        vt.textContent = ds.data[i];
+        svg.appendChild(vt);
+      }
+    });
+  });
+
+  container.appendChild(svg);
+}
+
+const WAKTU_ORDER = ["Subuh","Pagi","Siang","Sore","Malam"];
+
+function renderRadarChart(){
+  document.getElementById("waktuCuacaTag").textContent = state.year === 2026 ? `${monthLabel()} · log kejadian 2026` : "Log kejadian tidak tersedia untuk tahun ini";
+
+  const container = document.getElementById("radarChart");
+  if(state.year !== 2026){ container.innerHTML = `<p class="empty-state" style="padding:60px 10px;">Log kejadian tidak tersedia untuk tahun ini.</p>`; return; }
+
+  let rows = TRIP_LOG;
+  if(state.month !== -1) rows = rows.filter(r=>r.bulanIdx === state.month);
+
+  const lt5Counts = WAKTU_ORDER.map(w=> rows.filter(r=>r.waktu===w && r.durasi<5).length);
+  const gt5Counts = WAKTU_ORDER.map(w=> rows.filter(r=>r.waktu===w && r.durasi>=5).length);
+
+  let datasets = [
+    { label:"Temporer <5 menit", data: lt5Counts, color:"#06b6d4" },
+    { label:"Permanen >5 menit", data: gt5Counts, color:"#f43f5e" }
+  ];
+  if(localState.waktuCat === "lt5") datasets = [datasets[0]];
+  if(localState.waktuCat === "gt5") datasets = [datasets[1]];
+
+  renderRadarSVG("radarChart", WAKTU_ORDER, datasets);
+}
+
+function renderWeatherChart(){
+  const container = document.getElementById("weatherChart");
+  if(state.year !== 2026){ container.innerHTML = `<p class="empty-state" style="padding:60px 10px;">Log kejadian tidak tersedia untuk tahun ini.</p>`; return; }
+
+  let rows = TRIP_LOG;
+  if(state.month !== -1) rows = rows.filter(r=>r.bulanIdx === state.month);
+
+  const labels = ["☀️ Cerah","🌧️ Hujan"];
+  const lt5Counts = ["Cerah","Hujan"].map(w=> rows.filter(r=>r.cuaca===w && r.durasi<5).length);
+  const gt5Counts = ["Cerah","Hujan"].map(w=> rows.filter(r=>r.cuaca===w && r.durasi>=5).length);
+
+  let datasets = [
+    { label:"Temporer <5 menit", data: lt5Counts, color:"#06b6d4" },
+    { label:"Permanen >5 menit", data: gt5Counts, color:"#f43f5e" }
+  ];
+  if(localState.waktuCat === "lt5") datasets = [datasets[0]];
+  if(localState.waktuCat === "gt5") datasets = [datasets[1]];
+
+  renderRadarSVG("weatherChart", labels, datasets);
+}
+
+// ============================================================
+// RENDER: KEYPOINT TABLE
+// ============================================================
+function renderKeypointTable(){
+  const cat = localState.kpCat;
+  let data = getKeypointData(cat).filter(d=>d.total>0);
+
+  // search
+  if(localState.kpSearch.trim() !== ""){
+    const q = localState.kpSearch.trim().toLowerCase();
+    data = data.filter(d=> d.name.toLowerCase().includes(q));
+  }
+
+  // sort
+  switch(localState.kpSort){
+    case "total-asc": data.sort((a,b)=> a.total - b.total); break;
+    case "name-asc": data.sort((a,b)=> a.name.localeCompare(b.name)); break;
+    case "name-desc": data.sort((a,b)=> b.name.localeCompare(a.name)); break;
+    default: data.sort((a,b)=> b.total - a.total); // total-desc
+  }
+
+  const tbody = document.getElementById("kpBody");
+  tbody.innerHTML = "";
+
+  if(data.length === 0){
+    tbody.innerHTML = `<tr><td colspan="16" class="empty-state">Tidak ada keypoint yang cocok dengan pencarian/filter ini.</td></tr>`;
+    document.getElementById("kpTag").textContent = "0 keypoint";
+    return;
+  }
+
+  const maxTotal = Math.max(...data.map(d=>d.total), 1);
+
+  data.forEach(k=>{
+    const rowMonths = state.month === -1 ? k.values : k.values.map((v,i)=> i===state.month ? v : null);
+    const displayTotal = state.month === -1 ? k.total : (k.values[state.month]||0);
+    const pct = (displayTotal/maxTotal)*100;
+
+    let catBadge = "";
+    if(cat === "lt5") catBadge = `<span class="badge-cat lt5">&lt;5 menit</span>`;
+    else if(cat === "gt5") catBadge = `<span class="badge-cat gt5">&gt;5 menit</span>`;
+    else {
+      catBadge = (k.hasLt5? `<span class="badge-cat lt5">&lt;5</span> ` : "") + (k.hasGt5? `<span class="badge-cat gt5">&gt;5</span>`:"");
+    }
+
+    const monthsHtml = rowMonths.map(v=>{
+      if(v === null) return `<td class="num" style="color:#d8d4ef;">·</td>`;
+      return `<td class="num">${v}</td>`;
+    }).join("");
+
+    const fillClass = cat === "gt5" ? "gt5" : "";
+
+    tbody.innerHTML += `
+      <tr>
+        <td class="name">${k.name}</td>
+        <td class="num">${catBadge}</td>
+        ${monthsHtml}
+        <td class="total">${displayTotal}</td>
+        <td>
+          <div class="bar-cell">
+            <div class="bar-track"><div class="bar-fill ${fillClass}" style="width:${pct}%"></div></div>
+            <span style="font-size:11px;color:var(--ink-faint);min-width:24px;">${pct.toFixed(0)}%</span>
+          </div>
+        </td>
+      </tr>`;
+  });
+
+  document.getElementById("kpTag").textContent = `${data.length} keypoint aktif`;
+}
+
+// ============================================================
+// RENDER: LOG TABLE
+// ============================================================
+function renderLogTable(){
+  const tbody = document.getElementById("logBody");
+  tbody.innerHTML = "";
+
+  if(state.year !== 2026){
+    tbody.innerHTML = `<tr><td colspan="10" class="empty-state">Log detail kejadian untuk tahun ${state.year} belum tersedia di sumber data.</td></tr>`;
+    document.getElementById("logTag").textContent = "Tidak ada data";
+    return;
+  }
+
+  let rows = getFilteredLogWithLocal();
+
+  if(rows.length === 0){
+    tbody.innerHTML = `<tr><td colspan="10" class="empty-state">Tidak ada kejadian yang cocok dengan filter/pencarian ini.</td></tr>`;
+    document.getElementById("logTag").textContent = "0 kejadian";
+    return;
+  }
+
+  rows.forEach(r=>{
+    const weatherClass = r.cuaca === "Hujan" ? "weather-hujan" : "weather-cerah";
+    const durClass = r.durasi < 5 ? "dur-short" : "dur-long";
+    const waktuClass = "waktu-" + r.waktu.toLowerCase();
+    tbody.innerHTML += `
+      <tr>
+        <td>${r.no}</td>
+        <td>${MONTHS_FULL[r.bulanIdx]}</td>
+        <td style="font-weight:700;">${r.keypoint}</td>
+        <td>${r.tanggal}</td>
+        <td>${r.trip}</td>
+        <td>${r.normal}</td>
+        <td><span class="chip ${durClass}">${r.durasi} menit</span></td>
+        <td style="max-width:220px;">${r.temuan}</td>
+        <td><span class="chip ${weatherClass}">${r.cuaca === "Hujan" ? "🌧️" : "☀️"} ${r.cuaca}</span></td>
+        <td><span class="chip ${waktuClass}">${waktuIcon(r.waktu)} ${r.waktu}</span></td>
+      </tr>`;
+  });
+
+  document.getElementById("logTag").textContent = `${rows.length} kejadian`;
+}
+
+function waktuIcon(w){
+  const map = { Subuh:"🌌", Pagi:"🌅", Siang:"🌤️", Sore:"🌇", Malam:"🌙" };
+  return map[w] || "🕐";
+}
+
+// dipakai oleh chart (radar/cuaca) -> hanya filter global (bulan, kategori)
+function getFilteredLog(){
+  let rows = TRIP_LOG;
+  if(state.month !== -1) rows = rows.filter(r=>r.bulanIdx === state.month);
+  if(state.cat === "lt5") rows = rows.filter(r=>r.durasi < 5);
+  if(state.cat === "gt5") rows = rows.filter(r=>r.durasi >= 5);
+  return rows;
+}
+
+// dipakai oleh tabel log -> filter global + filter lokal (search, durasi, sort)
+function getFilteredLogWithLocal(){
+  let rows = getFilteredLog();
+
+  if(localState.logCat === "lt5") rows = rows.filter(r=>r.durasi < 5);
+  if(localState.logCat === "gt5") rows = rows.filter(r=>r.durasi >= 5);
+
+  if(localState.logSearch.trim() !== ""){
+    const q = localState.logSearch.trim().toLowerCase();
+    rows = rows.filter(r=> r.keypoint.toLowerCase().includes(q) || r.temuan.toLowerCase().includes(q));
+  }
+
+  rows = rows.slice();
+  switch(localState.logSort){
+    case "no-desc": rows.sort((a,b)=> b.no - a.no); break;
+    case "durasi-desc": rows.sort((a,b)=> b.durasi - a.durasi); break;
+    case "durasi-asc": rows.sort((a,b)=> a.durasi - b.durasi); break;
+    default: rows.sort((a,b)=> a.no - b.no); // no-asc
+  }
+  return rows;
+}
+
+// ============================================================
+// RENDER ALL
+// ============================================================
+function renderAll(){
+  renderKPI();
+  renderTrendChart();
+  renderCauseChart();
+  renderCompChart();
+  renderRadarChart();
+  renderWeatherChart();
+  renderKeypointTable();
+  renderLogTable();
+}
+
+// ============================================================
+// EVENTS
+// ============================================================
+document.getElementById("yearFilter").addEventListener("change", e=>{
+  state.year = parseInt(e.target.value);
+  renderAll();
+});
+
+document.querySelectorAll("#catFilter button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll("#catFilter button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    state.cat = btn.dataset.cat;
+    renderAll();
+  });
+});
+
+document.querySelectorAll("#monthFilter button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll("#monthFilter button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    state.month = parseInt(btn.dataset.m);
+    renderAll();
+  });
+});
+
+// ---- local filter: Penyebab Gangguan (bulan) ----
+document.getElementById("causeMonthFilter").addEventListener("change", e=>{
+  localState.causeMonth = parseInt(e.target.value);
+  renderCauseChart();
+});
+
+// ---- local filter: Waktu Trip & Cuaca (kategori durasi) ----
+document.querySelectorAll("#waktuCatFilter button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll("#waktuCatFilter button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    localState.waktuCat = btn.dataset.cat;
+    renderRadarChart();
+    renderWeatherChart();
+  });
+});
+
+// ---- local filters: Rekap per Keypoint ----
+document.querySelectorAll("#kpCatFilter button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll("#kpCatFilter button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    localState.kpCat = btn.dataset.cat;
+    renderKeypointTable();
+  });
+});
+document.getElementById("kpSearch").addEventListener("input", e=>{
+  localState.kpSearch = e.target.value;
+  renderKeypointTable();
+});
+document.getElementById("kpSort").addEventListener("change", e=>{
+  localState.kpSort = e.target.value;
+  renderKeypointTable();
+});
+
+// ---- local filters: Log Kejadian ----
+document.querySelectorAll("#logCatFilter button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll("#logCatFilter button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    localState.logCat = btn.dataset.cat;
+    renderLogTable();
+  });
+});
+document.getElementById("logSearch").addEventListener("input", e=>{
+  localState.logSearch = e.target.value;
+  renderLogTable();
+});
+document.getElementById("logSort").addEventListener("change", e=>{
+  localState.logSort = e.target.value;
+  renderLogTable();
+});
+
+// clock
+function tick(){
+  const d = new Date();
+  document.getElementById("clock").textContent = d.toLocaleTimeString("id-ID");
+}
+setInterval(tick, 1000); tick();
+
+// ---- theme toggle (dark/light) ----
+function applyTheme(theme){
+  if(theme === "dark"){
+    document.documentElement.setAttribute("data-theme","dark");
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+  }
+  document.querySelectorAll("#themeToggle button").forEach(b=>{
+    b.classList.toggle("active", b.dataset.theme === theme);
+  });
+  try{ localStorage.setItem("interruptions-theme", theme); }catch(e){}
+}
+document.querySelectorAll("#themeToggle button").forEach(btn=>{
+  btn.addEventListener("click", ()=> applyTheme(btn.dataset.theme));
+});
+// load preferensi tersimpan (default: light)
+let savedTheme = "light";
+try{ savedTheme = localStorage.getItem("interruptions-theme") || "light"; }catch(e){}
+applyTheme(savedTheme);
+
+// init
+renderAll();
+</script>
+</body>
+</html>
