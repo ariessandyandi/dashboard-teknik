@@ -596,7 +596,7 @@
           <div class="cs-value" id="causeInternalVal">0</div>
         </div>
         <div class="cs-item">
-          <div class="cs-label"><span class="legend-sq" style="background:#f59e0b"></span>External Unit</div>
+          <div class="cs-label"><span class="legend-sq" style="background:#10b981"></span>External Unit</div>
           <div class="cs-value" id="causeExternalVal">0</div>
         </div>
       </div>
@@ -944,6 +944,123 @@ async function loadTripLogFromSheet(){
   }
 }
 
+// ============================================================
+// DATA LIVE: REKAP RESMI INTERNAL vs EXTERNAL ("RAW DASHBOARD ARIES")
+// Tab ini sudah berisi angka resmi per bulan untuk kategori
+// <5 MENIT / >5 MENIT / TOTAL, baris "...INTERNAL..." & "...EXTERNAL...".
+// Kolom (posisi tetap, sesuai struktur sheet): R=kategori, S=tahun,
+// T=label baris, U..AF=Jan..Des (12 bulan), AG=total tahunan.
+// ============================================================
+const CAUSE_SHEET_GID = 'PASTE_GID_SHEET_RAW_DASHBOARD_ARIES_DISINI'; // <-- ganti dengan gid tab "RAW DASHBOARD ARIES"
+const CAUSE_CSV_URL = `https://docs.google.com/spreadsheets/d/e/${RAW_SHEET_PUB_ID}/pub?gid=${CAUSE_SHEET_GID}&single=true&output=csv`;
+
+// posisi kolom (0-indexed): A=0 ... R=17, S=18, T=19, U=20 ... AF=31, AG=32
+const CAUSE_COL = { kategori: 17, tahun: 18, label: 19, bulanStart: 20, bulanCount: 12 };
+
+let RAW_CAUSE_TOTALS = {};      // { [tahun]: { all:{internal,external}, lt5:{...}, gt5:{...} } }
+let RAW_CATEGORY_TOTALS = {};   // { [tahun]: { lt5:[12 bulan], gt5:[12 bulan] } } -- dari baris R="<5/>5 MENIT", T="TOTAL"
+let USE_RAW_CAUSE_TOTALS = false;
+
+async function loadCauseTotalsFromSheet(){
+  try{
+    if(!CAUSE_SHEET_GID || CAUSE_SHEET_GID.startsWith('PASTE_GID')){
+      throw new Error('CAUSE_SHEET_GID belum diisi - tempel gid tab "RAW DASHBOARD ARIES" di kode.');
+    }
+    const resp = await fetch(CAUSE_CSV_URL + '&t=' + Date.now());
+    if(!resp.ok) throw new Error('Gagal fetch sheet rekap Internal/External (HTTP ' + resp.status + ')');
+    const text = await resp.text();
+    if(!text || text.trim().length < 10) throw new Error('Respons CSV kosong - cek sharing sheet (harus "Anyone with link: Viewer")');
+    const rows = parseCSVRows(text);
+
+    const result = {};
+    const categoryTotals = {};
+    rows.forEach(row=>{
+      const kategoriRaw = (row[CAUSE_COL.kategori] || '').trim().toUpperCase();
+      const tahun = parseInt(row[CAUSE_COL.tahun]);
+      const labelRaw = (row[CAUSE_COL.label] || '').trim().toUpperCase();
+      if(!kategoriRaw || !tahun || !labelRaw) return;
+
+      const months = [];
+      for(let i=0; i<CAUSE_COL.bulanCount; i++){
+        months.push(parseFloat((row[CAUSE_COL.bulanStart+i]||'0').replace(',', '.')) || 0);
+      }
+
+      // ---- baris rekap Internal vs External (dipakai chart Partisipasi Penyebab) ----
+      const isInternal = labelRaw.includes('INTERNAL') && !labelRaw.includes('EXTERNAL');
+      const isExternal = labelRaw.includes('EXTERNAL') && !labelRaw.includes('INTERNAL');
+      if(isInternal || isExternal){
+        let bucket = null;
+        if(kategoriRaw === 'TOTAL') bucket = 'all';
+        else if(kategoriRaw === '<5 MENIT' && labelRaw.includes('TRIP')) bucket = 'lt5';
+        else if(kategoriRaw === '>5 MENIT' && labelRaw.includes('TRIP')) bucket = 'gt5';
+        if(bucket){
+          if(!result[tahun]) result[tahun] = {};
+          if(!result[tahun][bucket]) result[tahun][bucket] = { internal: Array(12).fill(0), external: Array(12).fill(0) };
+          result[tahun][bucket][isInternal ? 'internal' : 'external'] = months;
+        }
+      }
+
+      // ---- baris TOTAL resmi per kategori (dipakai kartu KPI: Total/Temporer/Permanen) ----
+      if(labelRaw === 'TOTAL' && (kategoriRaw === '<5 MENIT' || kategoriRaw === '>5 MENIT')){
+        if(!categoryTotals[tahun]) categoryTotals[tahun] = {};
+        categoryTotals[tahun][kategoriRaw === '<5 MENIT' ? 'lt5' : 'gt5'] = months;
+      }
+    });
+
+    console.log('Rekap Internal/External dimuat dari sheet:', result);
+    console.log('Rekap Total per kategori (KPI) dimuat dari sheet:', categoryTotals);
+    return { causeByBucket: result, categoryTotals };
+  }catch(err){
+    console.error('Gagal memuat rekap Internal/External resmi, fallback ke estimasi kata kunci:', err);
+    return null;
+  }
+}
+
+// pilih sumber data Internal/External: utamakan rekap resmi dari sheet,
+// fallback ke tebakan kata kunci dari Log Kejadian, fallback terakhir ke data contoh statis
+function causeTotalsFor(cat, year){
+  if(USE_RAW_CAUSE_TOTALS && RAW_CAUSE_TOTALS[year]){
+    const bucket = RAW_CAUSE_TOTALS[year][cat] || RAW_CAUSE_TOTALS[year].all;
+    if(bucket) return bucket;
+  }
+  return USE_REAL_CAUSE_DATA ? realCauseTotals(cat, year) : causeTotals(cat, year);
+}
+
+// ambil array 12 bulan untuk Total/Temporer/Permanen -- utamakan rekap resmi sheet
+function bucketSum(bucket){
+  if(!bucket) return null;
+  return bucket.internal.map((v,i)=> v + bucket.external[i]);
+}
+function lt5ArrFor(year){
+  if(USE_RAW_CAUSE_TOTALS){
+    if(RAW_CATEGORY_TOTALS[year] && RAW_CATEGORY_TOTALS[year].lt5) return RAW_CATEGORY_TOTALS[year].lt5;
+    const fromBucket = RAW_CAUSE_TOTALS[year] && bucketSum(RAW_CAUSE_TOTALS[year].lt5);
+    if(fromBucket) return fromBucket;
+  }
+  return TREND_TEMPORER[year] || Array(12).fill(0);
+}
+function gt5ArrFor(year){
+  if(USE_RAW_CAUSE_TOTALS){
+    if(RAW_CATEGORY_TOTALS[year] && RAW_CATEGORY_TOTALS[year].gt5) return RAW_CATEGORY_TOTALS[year].gt5;
+    const fromBucket = RAW_CAUSE_TOTALS[year] && bucketSum(RAW_CAUSE_TOTALS[year].gt5);
+    if(fromBucket) return fromBucket;
+  }
+  return TREND_PERMANEN[year] || Array(12).fill(0);
+}
+function totalArrFor(year){
+  if(USE_RAW_CAUSE_TOTALS){
+    if(RAW_CATEGORY_TOTALS[year] && RAW_CATEGORY_TOTALS[year].lt5 && RAW_CATEGORY_TOTALS[year].gt5){
+      return RAW_CATEGORY_TOTALS[year].lt5.map((v,i)=> v + RAW_CATEGORY_TOTALS[year].gt5[i]);
+    }
+    const fromAll = RAW_CAUSE_TOTALS[year] && bucketSum(RAW_CAUSE_TOTALS[year].all);
+    if(fromAll) return fromAll;
+    // fallback terakhir: jumlahkan lt5ArrFor + gt5ArrFor (sudah punya rantai fallback sendiri)
+    const lt5 = lt5ArrFor(year), gt5 = gt5ArrFor(year);
+    if(lt5.some(v=>v>0) || gt5.some(v=>v>0)) return lt5.map((v,i)=> v + gt5[i]);
+  }
+  return TREND_TOTAL[year] || Array(12).fill(0);
+}
+
 // klasifikasi penyebab -> Internal / Eksternal (pakai KATEGORI PENYEBAB jika ada, fallback ke kata kunci TEMUAN)
 const CAUSE_KW_EXTERNAL = ['POHON','RANTING','DAUN','LAYANGAN','BINATANG','ULAR','TUPAI','BIAWAK','PETIR','ATAP','SENG','BENDA ASING','PIHAK','KENDARAAN','TERBANG'];
 const CAUSE_KW_INTERNAL = ['ISOLATOR','CLAMP','TRAVES','KABEL','KONDUKTOR','RANTAS','FUSE','FCO','ARRESTER','RECLOSER','TIANG','KONSTRUKSI','RELAY','RUSAK','RAPUH','JUMPER','ANDONGAN','PHBTR','TRAFO'];
@@ -951,6 +1068,9 @@ const CAUSE_KW_INTERNAL = ['ISOLATOR','CLAMP','TRAVES','KABEL','KONDUKTOR','RANT
 function classifyCause(item){
   // prioritaskan kolom KATEGORI PENYEBAB kalau ada isinya, fallback ke kata kunci di TEMUAN
   const label = ((item.kategoriPenyebab && item.kategoriPenyebab.trim()) || item.temuan || '').toUpperCase();
+  // jika kolom sumber sudah eksplisit menyebut "INTERNAL"/"EXTERNAL", pakai itu langsung
+  if(label.includes('INTERNAL')) return 'internal';
+  if(label.includes('EXTERNAL') || label.includes('EKSTERNAL')) return 'external';
   if(CAUSE_KW_EXTERNAL.some(k=> label.includes(k))) return 'external';
   if(CAUSE_KW_INTERNAL.some(k=> label.includes(k))) return 'internal';
   return 'external'; // penyebab tidak jelas/luar kendali (mis. "GTJ") digabung ke External
@@ -1182,9 +1302,9 @@ function drawSpark(svgId, arr, color){
 // ============================================================
 function renderKPI(){
   const y = state.year;
-  const totalArr = TREND_TOTAL[y] || Array(12).fill(0);
-  const lt5Arr = TREND_TEMPORER[y] || Array(12).fill(0);
-  const gt5Arr = TREND_PERMANEN[y] || Array(12).fill(0);
+  const totalArr = totalArrFor(y);
+  const lt5Arr = lt5ArrFor(y);
+  const gt5Arr = gt5ArrFor(y);
 
   const slice = (arr)=> state.month === -1 ? arr : [arr[state.month]];
 
@@ -1204,7 +1324,7 @@ function renderKPI(){
   drawSpark("sparkGt5", gt5Arr, "#ffffff");
 
   const otherYear = y === 2026 ? 2025 : 2026;
-  const otherArr = TREND_TOTAL[otherYear] || Array(12).fill(0);
+  const otherArr = totalArrFor(otherYear);
   const otherTotal = sum(slice(otherArr));
   let yoyText = "—";
   if(otherTotal > 0){
@@ -1257,13 +1377,13 @@ function renderTrendChart(){
   let series = [];
   if(state.cat === "all"){
     series = [
-      { label:"Temporer <5 menit", data: TREND_TEMPORER[y], color:"#06b6d4", colorSoft:"rgba(34,211,238,.32)" },
-      { label:"Permanen >5 menit", data: TREND_PERMANEN[y], color:"#f43f5e", colorSoft:"rgba(244,63,94,.28)" }
+      { label:"Temporer <5 menit", data: lt5ArrFor(y), color:"#06b6d4", colorSoft:"rgba(34,211,238,.32)" },
+      { label:"Permanen >5 menit", data: gt5ArrFor(y), color:"#f43f5e", colorSoft:"rgba(244,63,94,.28)" }
     ];
   } else if(state.cat === "lt5"){
-    series = [{ label:"Temporer <5 menit", data: TREND_TEMPORER[y], color:"#06b6d4", colorSoft:"rgba(34,211,238,.38)" }];
+    series = [{ label:"Temporer <5 menit", data: lt5ArrFor(y), color:"#06b6d4", colorSoft:"rgba(34,211,238,.38)" }];
   } else {
-    series = [{ label:"Permanen >5 menit", data: TREND_PERMANEN[y], color:"#f43f5e", colorSoft:"rgba(244,63,94,.32)" }];
+    series = [{ label:"Permanen >5 menit", data: gt5ArrFor(y), color:"#f43f5e", colorSoft:"rgba(244,63,94,.32)" }];
   }
 
   document.getElementById("trendTag").textContent = `${y} · ${catLabel()}`;
@@ -1326,9 +1446,7 @@ function renderTrendChart(){
 // ============================================================
 function renderCauseChart(){
   const y = state.year;
-  const cause = USE_REAL_CAUSE_DATA
-    ? realCauseTotals(state.cat, y)
-    : causeTotals(state.cat, y);
+  const cause = causeTotalsFor(state.cat, y);
   const container = document.getElementById("causeChart");
   container.innerHTML = "";
 
@@ -1349,7 +1467,7 @@ function renderCauseChart(){
 
   const legend = document.createElement("div");
   legend.className = "svg-legend";
-  legend.innerHTML = `<span><span class="legend-sq" style="background:linear-gradient(135deg,#60a5fa,#2563eb)"></span>Internal Unit</span><span><span class="legend-sq" style="background:linear-gradient(135deg,#fbbf24,#ea580c)"></span>External Unit</span>`;
+  legend.innerHTML = `<span><span class="legend-sq" style="background:#3b82f6"></span>Internal Unit</span><span><span class="legend-sq" style="background:#10b981"></span>External Unit</span>`;
   container.appendChild(legend);
 
   const n = labels.length;
@@ -1365,20 +1483,15 @@ function renderCauseChart(){
 
   const svg = svgEl("svg", { viewBox:`0 0 ${W} ${H}`, preserveAspectRatio:"none" });
 
-  // ---- defs: gradient & shadow biar lebih eyecatching ----
+  // ---- defs: warna solid biru (internal) & hijau (external) + shadow tipis ----
   const defs = svgEl("defs", {});
-  const gradInt = svgEl("linearGradient", { id:"gradInternal", x1:"0", y1:"0", x2:"0", y2:"1" });
-  gradInt.appendChild(svgEl("stop", { offset:"0%", "stop-color":"#60a5fa" }));
-  gradInt.appendChild(svgEl("stop", { offset:"100%", "stop-color":"#2563eb" }));
-  defs.appendChild(gradInt);
-  const gradExt = svgEl("linearGradient", { id:"gradExternal", x1:"0", y1:"0", x2:"0", y2:"1" });
-  gradExt.appendChild(svgEl("stop", { offset:"0%", "stop-color":"#fbbf24" }));
-  gradExt.appendChild(svgEl("stop", { offset:"100%", "stop-color":"#ea580c" }));
-  defs.appendChild(gradExt);
   const shadow = svgEl("filter", { id:"barShadow", x:"-40%", y:"-20%", width:"180%", height:"160%" });
-  shadow.innerHTML = `<feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#1e293b" flood-opacity="0.18"/>`;
+  shadow.innerHTML = `<feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#1e293b" flood-opacity="0.15"/>`;
   defs.appendChild(shadow);
   svg.appendChild(defs);
+
+  const COLOR_INTERNAL = "#3b82f6";
+  const COLOR_EXTERNAL = "#10b981";
 
   // grid (garis putus-putus halus)
   const steps = 4;
@@ -1396,9 +1509,25 @@ function renderCauseChart(){
     svg.appendChild(t);
   });
 
-  // bar chart bertumpuk (Internal -> External) per bulan - gaya Participation Overview, dengan gradasi + shadow
+  // bar chart bertumpuk (Internal di bawah -> External di atas) per bulan, batang persegi (bukan kapsul)
   const barW = Math.min(slot*0.6, 50);
-  const radius = Math.min(barW/2.4, 10);
+  const topRadius = Math.min(barW/2.4, 8);
+
+  // helper: rect biasa dengan opsi sudut atas membulat
+  function roundedTopRectPath(x, y, w, h, r){
+    const rr = Math.min(r, h, w/2);
+    if(rr <= 0){
+      return `M${x},${y} h${w} v${h} h${-w} Z`;
+    }
+    return `M${x},${y+rr}
+      a${rr},${rr} 0 0 1 ${rr},${-rr}
+      h${w-2*rr}
+      a${rr},${rr} 0 0 1 ${rr},${rr}
+      v${h-rr}
+      h${-w}
+      Z`;
+  }
+
   months.forEach((mi,i)=>{
     const cx = xPos(i);
     const bx = cx - barW/2;
@@ -1407,42 +1536,38 @@ function renderCauseChart(){
     const topI = baseline - hi;
     const topE = topI - he;
     const total = vi + ve;
+    if(total === 0) return;
 
-    const grp = svgEl("g", {});
-    if(total > 0) grp.setAttribute("filter", "url(#barShadow)");
+    const grp = svgEl("g", { filter:"url(#barShadow)" });
 
+    // segmen Internal (bawah) — sudut atas membulat hanya jika tidak ada segmen External di atasnya
     if(hi > 0){
-      const rInt = svgEl("rect", {
-        x:bx, y:topI, width:barW, height:hi,
-        fill:"url(#gradInternal)",
-        rx: radius, ry: radius,
-        class:"svg-pt"
-      });
+      const internalIsTop = he <= 0;
+      const d = internalIsTop
+        ? roundedTopRectPath(bx, topI, barW, hi, topRadius)
+        : `M${bx},${topI} h${barW} v${hi} h${-barW} Z`;
+      const rInt = svgEl("path", { d, fill:COLOR_INTERNAL, class:"svg-pt" });
       rInt.addEventListener("mouseenter", ()=> showTip(container, cx/W*container.clientWidth, topI/H*container.clientHeight, `<b>${labels[i]}</b> · Internal: ${vi}`));
       rInt.addEventListener("mouseleave", ()=> hideTip(container));
       grp.appendChild(rInt);
     }
+    // segmen External (atas) — selalu sudut atas membulat
     if(he > 0){
-      const rExt = svgEl("rect", {
-        x:bx, y:Math.max(topE,padT), width:barW, height:he,
-        fill:"url(#gradExternal)",
-        rx: radius, ry: radius,
-        class:"svg-pt"
-      });
-      rExt.addEventListener("mouseenter", ()=> showTip(container, cx/W*container.clientWidth, Math.max(topE,padT)/H*container.clientHeight, `<b>${labels[i]}</b> · External: ${ve}`));
+      const topClamped = Math.max(topE, padT);
+      const d = roundedTopRectPath(bx, topClamped, barW, he, topRadius);
+      const rExt = svgEl("path", { d, fill:COLOR_EXTERNAL, class:"svg-pt" });
+      rExt.addEventListener("mouseenter", ()=> showTip(container, cx/W*container.clientWidth, topClamped/H*container.clientHeight, `<b>${labels[i]}</b> · External: ${ve}`));
       rExt.addEventListener("mouseleave", ()=> hideTip(container));
       grp.appendChild(rExt);
     }
     svg.appendChild(grp);
 
-    if(total > 0){
-      const labelY = Math.max(topE,padT) - 14;
-      const pillW = String(total).length > 1 ? 22 : 18;
-      svg.appendChild(svgEl("rect", { x:cx-pillW/2, y:labelY-12, width:pillW, height:17, rx:8, fill:"#1e293b" }));
-      const lt = svgEl("text", { x:cx, y:labelY, "text-anchor":"middle", "font-size":10.5, "font-weight":800, fill:"#ffffff", "font-family":"Space Grotesk" });
-      lt.textContent = total;
-      svg.appendChild(lt);
-    }
+    const labelY = Math.max(topE,padT) - 14;
+    const pillW = String(total).length > 1 ? 22 : 18;
+    svg.appendChild(svgEl("rect", { x:cx-pillW/2, y:labelY-12, width:pillW, height:17, rx:8, fill:"#1e293b" }));
+    const lt = svgEl("text", { x:cx, y:labelY, "text-anchor":"middle", "font-size":10.5, "font-weight":800, fill:"#ffffff", "font-family":"Space Grotesk" });
+    lt.textContent = total;
+    svg.appendChild(lt);
   });
 
   container.appendChild(svg);
@@ -1464,8 +1589,8 @@ function donutPath(cx, cy, rOuter, rInner, startAngle, endAngle){
 function renderCompChart(){
   const y = state.year;
   const slice = (arr)=> state.month === -1 ? sum(arr) : (arr[state.month]||0);
-  const lt5 = slice(TREND_TEMPORER[y] || Array(12).fill(0));
-  const gt5 = slice(TREND_PERMANEN[y] || Array(12).fill(0));
+  const lt5 = slice(lt5ArrFor(y));
+  const gt5 = slice(gt5ArrFor(y));
   document.getElementById("compTag").textContent = `${y} · ${monthLabel()}`;
 
   const container = document.getElementById("compChart");
@@ -1933,6 +2058,12 @@ applyTheme(savedTheme);
     TRIP_LOG = liveLog;
     USE_REAL_CAUSE_DATA = true;
     rebuildLiveTrendAndKeypoint();
+  }
+  const rawCause = await loadCauseTotalsFromSheet();
+  if(rawCause && (Object.keys(rawCause.causeByBucket||{}).length || Object.keys(rawCause.categoryTotals||{}).length)){
+    RAW_CAUSE_TOTALS = rawCause.causeByBucket || {};
+    RAW_CATEGORY_TOTALS = rawCause.categoryTotals || {};
+    USE_RAW_CAUSE_TOTALS = true;
   }
   renderAll();
 })();
