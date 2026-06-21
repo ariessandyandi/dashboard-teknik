@@ -493,7 +493,10 @@
 
 <script>
   // ====================== CONFIG ======================
-  const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTxJWuRpxxFJUaRKp-VdalrXsnbaiD1hwy5B94C7raWEouzlRhVdXAPRSbmnLeEqYUV27r6YhxkFlxe/pub?gid=219828157&single=true&output=csv&t=' + Date.now();
+  const SHEET_BASE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTxJWuRpxxFJUaRKp-VdalrXsnbaiD1hwy5B94C7raWEouzlRhVdXAPRSbmnLeEqYUV27r6YhxkFlxe/pub?gid=219828157&single=true&output=csv';
+  function getSheetUrl() { return SHEET_BASE_URL + '&t=' + Date.now(); }
+  const AUTO_REFRESH_MS = 60000; // cek perubahan data tiap 60 detik
+  let lastCSVText = null;
 
   // Icon mapping per TEMUAN (kolom C)
   const ICONS = {
@@ -840,11 +843,19 @@
   }
 
   // ====================== MAIN LOAD ======================
-  async function loadData() {
+  async function loadData(isAutoRefresh = false) {
     try {
-      const resp = await fetch(SHEET_URL);
+      const resp = await fetch(getSheetUrl(), { cache: 'no-store' });
       if (!resp.ok) throw new Error('Gagal fetch');
       const text = await resp.text();
+
+      // Kalau auto-refresh dan teks CSV persis sama dengan sebelumnya, tidak perlu render ulang
+      if (isAutoRefresh && text === lastCSVText) {
+        return;
+      }
+      const isFirstLoad = lastCSVText === null;
+      lastCSVText = text;
+
       const { headers, rows } = parseCSV(text);
 
       // Tag index
@@ -858,14 +869,23 @@
       renderMarkers(rows, headers);
       renderTable(rows, headers);
       document.getElementById('filterInfo').textContent = `Menampilkan ${rows.length} dari ${rows.length} data`;
+
+      if (isAutoRefresh && !isFirstLoad) {
+        showToast('Data baru terdeteksi, dashboard diperbarui', 'success');
+      }
     } catch (err) {
       console.error(err);
-      document.getElementById('tabelTemuan').innerHTML =
-        `<tr><td colspan="9" style="text-align:center;color:#ef4444;padding:24px;"><i class="fa-solid fa-triangle-exclamation me-2"></i>Gagal memuat data. Pastikan sheet sudah dipublish.</td></tr>`;
+      if (!isAutoRefresh) {
+        document.getElementById('tabelTemuan').innerHTML =
+          `<tr><td colspan="9" style="text-align:center;color:#ef4444;padding:24px;"><i class="fa-solid fa-triangle-exclamation me-2"></i>Gagal memuat data. Pastikan sheet sudah dipublish.</td></tr>`;
+      }
     } finally {
       document.getElementById('loadingOverlay').style.display = 'none';
     }
   }
+
+  // ====================== AUTO REFRESH ======================
+  setInterval(() => loadData(true), AUTO_REFRESH_MS);
 
   // ====================== DATETIME ======================
   function updateDateTime() {
