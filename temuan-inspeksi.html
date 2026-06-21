@@ -593,10 +593,12 @@
     return null;
   }
 
-  let LAT_COL = null, LNG_COL = null;
+  let LAT_COL = null, LNG_COL = null, EVIDENCE_COL = null;
   function resolveCoordColumns(headers) {
     LAT_COL = findColumn(headers, ['LATITUDE (Y)', 'LATITUDE', 'LAT', 'Y']);
-    LNG_COL = findColumn(headers, ['LONGITUDE (X)', 'LONGITUDE', 'LONG', 'LNG', 'X']);
+    // 'LONGTITUDE' = typo umum yang sering muncul di data lapangan (huruf ti/it tertukar)
+    LNG_COL = findColumn(headers, ['LONGITUDE (X)', 'LONGTITUDE (X)', 'LONGITUDE', 'LONGTITUDE', 'LONG', 'LNG', 'X']);
+    EVIDENCE_COL = findColumn(headers, ['EVIDENCE', 'LINK EVIDENCE', 'FOTO', 'DOKUMENTASI']);
   }
 
   function splitCSVLine(line) {
@@ -614,6 +616,7 @@
   function parseCoord(val) {
     if (!val) return NaN;
     let v = String(val).replace(/['"]/g, '').trim();
+    if (!v) return NaN;
     // Jika format pakai koma sebagai desimal (misal: 109,203467) tanpa titik → ganti koma ke titik
     // Jika sudah pakai titik desimal (misal: 109.203467) → langsung parse
     // Deteksi: kalau ada titik → sudah format desimal standar
@@ -622,6 +625,17 @@
     }
     // Hapus koma yang tersisa (pemisah ribuan)
     v = v.replace(/,/g, '');
+
+    // Tangani format rusak dengan banyak titik, misal "109.214.700" yang
+    // semestinya "109.2147" (titik kedua dst harusnya bukan pemisah desimal baru,
+    // melainkan bagian dari angka desimal yang sama, biasa terjadi karena salah ketik
+    // atau auto-format angka ribuan). Gabungkan semua bagian setelah titik pertama.
+    const dotCount = (v.match(/\./g) || []).length;
+    if (dotCount >= 2) {
+      const parts = v.split('.');
+      v = parts[0] + '.' + parts.slice(1).join('');
+    }
+
     return parseFloat(v);
   }
   function initMap() {
@@ -656,7 +670,7 @@
     const kategori = row['KATEGORI']        || row[headers[9]]  || '-';  // Kolom J
     const jTM      = row['JENIS TIANG TM']  || row[headers[10]] || '-';  // Kolom K
     const jTR      = row['JENIS TIANG TR']  || row[headers[11]] || '-';  // Kolom L
-    const link     = row['EVIDENCE']        || row[headers[13]] || row[headers[14]] || '';
+    const link     = row['EVIDENCE']        || (EVIDENCE_COL ? row[EVIDENCE_COL] : (row[headers[12]] || ''));
     const lokasi   = row['LOKASI']          || row[headers[4]]  || '-';  // Kolom E
     const penyulang= row['PENYULANG']       || row[headers[3]]  || '-';  // Kolom D
 
@@ -716,7 +730,7 @@
       const kategori = row['KATEGORI']      || row[headers[9]]  || '-';
       const jTM      = row['JENIS TIANG TM']|| row[headers[10]] || '-';
       const jTR      = row['JENIS TIANG TR']|| row[headers[11]] || '-';
-      const link     = row['EVIDENCE']      || row[headers[13]] || row[headers[14]] || '';
+      const link     = row['EVIDENCE']      || (EVIDENCE_COL ? row[EVIDENCE_COL] : (row[headers[12]] || ''));
       const color    = BADGE_COLORS[(temuan).toUpperCase()] || '#64748b';
       const evidence = link
         ? `<a href="${link}" target="_blank" style="color:#3b82f6;"><i class="fa-solid fa-link"></i></a>`
@@ -1048,7 +1062,7 @@
         row['KATEGORI']       || row[headers[9]]  || '',
         row['JENIS TIANG TM'] || row[headers[10]] || '',
         row['JENIS TIANG TR'] || row[headers[11]] || '',
-        row['EVIDENCE']       || row[headers[13]] || row[headers[14]] || '',
+        row['EVIDENCE']       || (EVIDENCE_COL ? row[EVIDENCE_COL] : (row[headers[12]] || '')),
       ]);
     });
 
