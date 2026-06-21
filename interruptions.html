@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gangguan | PLN ULP Sekura</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
   :root{
@@ -65,7 +65,7 @@
   *{box-sizing:border-box;}
   body{
     margin:0;
-    font-family:"Plus Jakarta Sans",sans-serif;
+    font-family:"Inter","Segoe UI",system-ui,sans-serif;
     background:
       var(--body-bg-1),
       var(--body-bg-2),
@@ -74,7 +74,7 @@
     min-height:100vh;
     transition:background-color .25s;
   }
-  h1,h2,h3, .num-display{ font-family:"Space Grotesk",sans-serif; }
+  h1,h2,h3, .num-display{ font-family:"Inter","Segoe UI",system-ui,sans-serif; }
 
   /* ===================== LAYOUT ===================== */
   .app{display:flex; min-height:100vh;}
@@ -128,7 +128,7 @@
     display:flex;align-items:center;justify-content:center;
     font-weight:800;color:#fff;font-size:14px;
     box-shadow:0 6px 16px -4px rgba(37,99,235,.55);
-    font-family:"Space Grotesk",sans-serif;
+    font-family:"Inter","Segoe UI",system-ui,sans-serif;
     flex-shrink:0;
   }
   .sb-brand .name{font-size:15px;font-weight:700;color:var(--ink);line-height:1.25;}
@@ -414,7 +414,7 @@
     font-size:11px; font-weight:700; color:var(--ink-faint); text-transform:uppercase;
     letter-spacing:.05em; margin-bottom:4px; display:flex; align-items:center; justify-content:center; gap:5px;
   }
-  .cs-value{ font-size:24px; font-weight:800; color:var(--ink); font-family:"Space Grotesk",sans-serif; }
+  .cs-value{ font-size:24px; font-weight:800; color:var(--ink); font-family:"Inter","Segoe UI",system-ui,sans-serif; }
 
   .local-filter-row{
     display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;
@@ -423,7 +423,7 @@
     flex:1; min-width:180px;
     border:1.5px solid var(--hairline); background:var(--surface-soft);
     border-radius:10px; padding:9px 14px; font-size:12.5px; font-weight:600;
-    color:var(--ink); font-family:"Plus Jakarta Sans",sans-serif;
+    color:var(--ink); font-family:"Inter","Segoe UI",system-ui,sans-serif;
   }
   .local-search:focus{ outline:none; border-color:var(--violet-soft); background:var(--surface); }
   .local-filter-row select.dd{ min-width:150px; }
@@ -1493,13 +1493,13 @@ function renderTrendChart(){
     const v = (niceMax/steps)*s;
     const gy = yPos(v);
     svg.appendChild(svgEl("line", { x1:padL, x2:W-padR, y1:gy, y2:gy, stroke:"#f3f1fc", "stroke-width":1 }));
-    const t = svgEl("text", { x:4, y:gy+3, "font-size":9, fill:"#a8a3c4", "font-family":"Plus Jakarta Sans" });
+    const t = svgEl("text", { x:4, y:gy+3, "font-size":9, fill:"#a8a3c4", "font-family":"Inter" });
     t.textContent = Math.round(v);
     svg.appendChild(t);
   }
   // x labels
   MONTHS_SHORT.forEach((m,i)=>{
-    const t = svgEl("text", { x:xPos(i), y:H-6, "font-size":9.5, fill:"#6b6489", "font-weight":600, "text-anchor":"middle", "font-family":"Plus Jakarta Sans" });
+    const t = svgEl("text", { x:xPos(i), y:H-6, "font-size":9.5, fill:"#6b6489", "font-weight":600, "text-anchor":"middle", "font-family":"Inter" });
     t.textContent = m;
     svg.appendChild(t);
   });
@@ -1581,12 +1581,12 @@ function renderCauseChart(){
     const v = Math.round((niceMax/steps)*s);
     const gy = yPos(v);
     svg.appendChild(svgEl("line", { x1:padL, x2:W-padR, y1:gy, y2:gy, stroke:"#eef0f7", "stroke-width":1, "stroke-dasharray":"3,4" }));
-    const t = svgEl("text", { x:2, y:gy+3, "font-size":9, fill:"#a8a3c4", "font-family":"Plus Jakarta Sans" });
+    const t = svgEl("text", { x:2, y:gy+3, "font-size":9, fill:"#a8a3c4", "font-family":"Inter" });
     t.textContent = v;
     svg.appendChild(t);
   }
   labels.forEach((m,i)=>{
-    const t = svgEl("text", { x:xPos(i), y:H-8, "font-size":10, fill:"#475569", "font-weight":700, "text-anchor":"middle", "font-family":"Plus Jakarta Sans" });
+    const t = svgEl("text", { x:xPos(i), y:H-8, "font-size":10, fill:"#475569", "font-weight":700, "text-anchor":"middle", "font-family":"Inter" });
     t.textContent = m;
     svg.appendChild(t);
   });
@@ -1647,7 +1647,7 @@ function renderCauseChart(){
     const labelY = Math.max(topE,padT) - 14;
     const pillW = String(total).length > 1 ? 22 : 18;
     svg.appendChild(svgEl("rect", { x:cx-pillW/2, y:labelY-12, width:pillW, height:17, rx:8, fill:"#1e293b" }));
-    const lt = svgEl("text", { x:cx, y:labelY, "text-anchor":"middle", "font-size":10.5, "font-weight":800, fill:"#ffffff", "font-family":"Space Grotesk" });
+    const lt = svgEl("text", { x:cx, y:labelY, "text-anchor":"middle", "font-size":10.5, "font-weight":800, fill:"#ffffff", "font-family":"Inter" });
     lt.textContent = total;
     svg.appendChild(lt);
   });
@@ -1708,10 +1708,10 @@ function renderCompChart(){
     angle = a1;
   });
 
-  const t1 = svgEl("text", { x:cx, y:cy-4, "text-anchor":"middle", "font-size":24, "font-weight":700, fill:"#1b1133", "font-family":"Space Grotesk" });
+  const t1 = svgEl("text", { x:cx, y:cy-4, "text-anchor":"middle", "font-size":24, "font-weight":700, fill:"#1b1133", "font-family":"Inter" });
   t1.textContent = total;
   svg.appendChild(t1);
-  const t2 = svgEl("text", { x:cx, y:cy+14, "text-anchor":"middle", "font-size":9.5, "font-weight":700, fill:"#a8a3c4", "font-family":"Plus Jakarta Sans" });
+  const t2 = svgEl("text", { x:cx, y:cy+14, "text-anchor":"middle", "font-size":9.5, "font-weight":700, fill:"#a8a3c4", "font-family":"Inter" });
   t2.textContent = "TOTAL TRIP";
   svg.appendChild(t2);
 
@@ -1760,7 +1760,7 @@ function renderRadarSVG(containerId, labels, datasetsArr){
     svg.appendChild(svgEl("path", { d, fill:"none", stroke:"#ece9fb", "stroke-width":1 }));
     // angka skala (nilai ring ini) ditaruh di sumbu pertama (atas)
     const ringVal = Math.round(niceMax*ring/rings);
-    const rt = svgEl("text", { x:cx+9, y:cy-rr-2, "font-size":8, fill:"#c4befa", "font-weight":700, "font-family":"Plus Jakarta Sans" });
+    const rt = svgEl("text", { x:cx+9, y:cy-rr-2, "font-size":8, fill:"#c4befa", "font-weight":700, "font-family":"Inter" });
     rt.textContent = ringVal;
     svg.appendChild(rt);
   }
@@ -1776,7 +1776,7 @@ function renderRadarSVG(containerId, labels, datasetsArr){
     let anchor = "middle";
     if(cosA > 0.35) anchor = "start";
     else if(cosA < -0.35) anchor = "end";
-    const t = svgEl("text", { x:lx, y:ly, "text-anchor":anchor, "dominant-baseline":"middle", "font-size":11, "font-weight":700, fill:"#1b1133", "font-family":"Plus Jakarta Sans" });
+    const t = svgEl("text", { x:lx, y:ly, "text-anchor":anchor, "dominant-baseline":"middle", "font-size":11, "font-weight":700, fill:"#1b1133", "font-family":"Inter" });
     t.textContent = lab;
     svg.appendChild(t);
   });
@@ -1809,7 +1809,7 @@ function renderRadarSVG(containerId, labels, datasetsArr){
         }
         const bg = svgEl("circle", { cx:lx, cy:ly, r:7.5, fill:"#fff", stroke:ds.color, "stroke-width":1.3 });
         svg.appendChild(bg);
-        const vt = svgEl("text", { x:lx, y:ly+0.5, "text-anchor":"middle", "dominant-baseline":"middle", "font-size":8.5, "font-weight":800, fill:ds.color, "font-family":"Plus Jakarta Sans" });
+        const vt = svgEl("text", { x:lx, y:ly+0.5, "text-anchor":"middle", "dominant-baseline":"middle", "font-size":8.5, "font-weight":800, fill:ds.color, "font-family":"Inter" });
         vt.textContent = ds.data[i];
         svg.appendChild(vt);
       }
