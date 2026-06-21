@@ -569,6 +569,36 @@
     return { headers, rows };
   }
 
+  // Normalisasi nama header: lowercase, buang spasi/simbol, supaya pencarian kolom
+  // tidak rapuh terhadap variasi penulisan ("LATITUDE (Y)" vs "Latitude_Y" dst).
+  function normHeader(h) {
+    return (h || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+
+  // Cari nama kolom asli di `headers` yang paling cocok dengan salah satu `candidates`.
+  // Dipakai sebagai pengganti index tetap (headers[5], headers[6], dst) yang rapuh
+  // kalau urutan kolom di spreadsheet berbeda dari asumsi.
+  function findColumn(headers, candidates) {
+    const normed = headers.map(normHeader);
+    for (const cand of candidates) {
+      const target = normHeader(cand);
+      // exact match dulu
+      let idx = normed.indexOf(target);
+      if (idx === -1) {
+        // partial match (header mengandung target atau sebaliknya)
+        idx = normed.findIndex(h => h.includes(target) || target.includes(h));
+      }
+      if (idx !== -1) return headers[idx];
+    }
+    return null;
+  }
+
+  let LAT_COL = null, LNG_COL = null;
+  function resolveCoordColumns(headers) {
+    LAT_COL = findColumn(headers, ['LATITUDE (Y)', 'LATITUDE', 'LAT', 'Y']);
+    LNG_COL = findColumn(headers, ['LONGITUDE (X)', 'LONGITUDE', 'LONG', 'LNG', 'X']);
+  }
+
   function splitCSVLine(line) {
     const result = []; let cur = ''; let inQ = false;
     for (let i = 0; i < line.length; i++) {
@@ -651,10 +681,11 @@
   function renderMarkers(rows, headers) {
     markersLayer.clearLayers();
     let bounds = [];
+    let skippedNoCoord = 0;
     rows.forEach(row => {
-      const lat = parseCoord(row['LATITUDE (Y)'] || row[headers[6]]);
-      const lng = parseCoord(row['LONGITUDE (X)'] || row[headers[5]]);
-      if (isNaN(lat) || isNaN(lng)) return;
+      const lat = parseCoord(LAT_COL ? row[LAT_COL] : (row['LATITUDE (Y)'] || row[headers[6]]));
+      const lng = parseCoord(LNG_COL ? row[LNG_COL] : (row['LONGITUDE (X)'] || row[headers[5]]));
+      if (isNaN(lat) || isNaN(lng)) { skippedNoCoord++; return; }
 
       const temuan = row[headers[2]] || '';
       const icon = getIcon(temuan);
@@ -664,6 +695,9 @@
       bounds.push([lat, lng]);
     });
     if (bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
+    if (skippedNoCoord > 0) {
+      console.warn(`${skippedNoCoord} baris dilewati karena koordinat tidak valid. Kolom lat/lng terdeteksi: ${LAT_COL || '(tidak ditemukan)'} / ${LNG_COL || '(tidak ditemukan)'}`);
+    }
   }
 
   // ====================== TABLE ======================
@@ -860,6 +894,8 @@
 
       // Tag index
       rows.forEach((r, i) => { r.__idx = i; });
+
+      resolveCoordColumns(headers);
 
       allData = rows.map(row => ({ row, headers }));
       filteredData = [...allData];
