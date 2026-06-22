@@ -778,6 +778,7 @@
 
   // ====================== GOOGLE SHEETS CONFIG ======================
   const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTxJWuRpxxFJUaRKp-VdalrXsnbaiD1hwy5B94C7raWEouzlRhVdXAPRSbmnLeEqYUV27r6YhxkFlxe/pub?gid=0&single=true&output=csv';
+  const LOG_CSV_URL_IDX = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTxJWuRpxxFJUaRKp-VdalrXsnbaiD1hwy5B94C7raWEouzlRhVdXAPRSbmnLeEqYUV27r6YhxkFlxe/pub?gid=2107201497&single=true&output=csv';
 
   // Pola kolom per bulan (index 0=Jan, 1=Feb, dst)
   const MONTH_COLS = {
@@ -1213,9 +1214,37 @@
     }
   }
 
+
+  // ====================== HITUNG TOTAL GANGGUAN DARI LOG ======================
+  async function loadGangguanFromLog() {
+    try {
+      const resp = await fetch(LOG_CSV_URL_IDX + '&t=' + Date.now());
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const text = await resp.text();
+      const lines = text.trim().split('\n').map(l => l.split(','));
+      const header = lines[0].map(h => h.trim().replace(/^\"|"$/g, '').toLowerCase());
+      const iDate = header.findIndex(h => h.includes('tanggal'));
+      let total2026 = 0;
+      for (let i = 1; i < lines.length; i++) {
+        const row = lines[i].map(c => c.trim().replace(/^\"|"$/g, ''));
+        if (!row || row.length < 2) continue;
+        const tgl = iDate >= 0 ? row[iDate] : '';
+        if (!tgl) continue;
+        const yr = tgl.includes('/') ? tgl.split('/')[2] : tgl.split('-')[0];
+        if (yr && yr.trim() === '2026') total2026++;
+      }
+      if (total2026 > 0) {
+        document.getElementById('kpiInterruption').innerText = total2026;
+      }
+    } catch(err) {
+      console.warn('loadGangguanFromLog gagal, pakai data sheet utama:', err);
+    }
+  }
+
   // ====================== REFRESH SEMUA DASHBOARD ======================
   async function refreshDashboard() {
     await loadKPIFromSheets();
+    await loadGangguanFromLog();
     await renderLineChart();
     await renderStackedBarChart();
     await renderYoYChart();
