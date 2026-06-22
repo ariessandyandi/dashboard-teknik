@@ -104,8 +104,7 @@
   .sidebar.collapsed .sb-link span,
   .sidebar.collapsed .sb-foot{ display:none; }
   .sidebar.collapsed .sb-brand{ justify-content:center; }
-  .sidebar.collapsed .sb-link{ justify-content:center; padding:14px 0; }
-  .sidebar.collapsed .sb-link svg{ margin-right:0; width:20px; height:20px; }
+  .sidebar.collapsed .sb-link{ justify-content:center; padding:14px 0; }  .sidebar.collapsed .sb-link svg{ margin-right:0; width:26px; height:26px; }
   .sidebar.collapsed .sb-link::after{
     content:attr(data-title);
     position:absolute; left:100%; top:50%; transform:translateY(-50%);
@@ -119,11 +118,11 @@
   .sidebar.collapsed .sb-link:hover::after{ opacity:1; }
 
   .sb-brand{
-    display:flex; align-items:center; gap:11px;
-    padding:0 6px 28px; margin-bottom:10px;
+    display:flex; align-items:center; gap:14px;
+    padding:0 6px 48px; margin-bottom:0;
   }
   .sb-brand .logo{
-    width:42px;height:42px;border-radius:11px;
+    width:70px;height:70px;border-radius:11px;
     background:linear-gradient(135deg,var(--violet),var(--pink));
     display:flex;align-items:center;justify-content:center;
     font-weight:800;color:#fff;font-size:14px;
@@ -131,8 +130,8 @@
     font-family:"Inter","Segoe UI",system-ui,sans-serif;
     flex-shrink:0;
   }
-  .sb-brand .name{font-size:15px;font-weight:700;color:var(--ink);line-height:1.25;}
-  .sb-brand .sub{font-size:11.5px;color:var(--ink-faint);}
+  .sb-brand .name{font-size:1.5rem;font-weight:700;color:var(--ink);line-height:1.25;background:linear-gradient(135deg,#60a5fa,#3b82f6);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sb-brand .sub{font-size:0.75rem;color:var(--ink-faint);}
 
   .sb-section-label{
     font-size:10px; letter-spacing:.12em; color:var(--ink-faint);
@@ -141,13 +140,13 @@
   .sidebar.collapsed .sb-section-label{ display:none; }
   .sb-link{
     display:flex; align-items:center; gap:14px;
-    margin-bottom:6px; padding:12px 14px;
-    font-size:14px; color:var(--ink-soft); text-decoration:none;
-    border-radius:14px; cursor:pointer; font-weight:500;
+    margin-bottom:10px; padding:12px 16px;
+    font-size:1rem; color:var(--ink-soft); text-decoration:none;
+    border-radius:16px; cursor:pointer; font-weight:500;
     transition:background .15s, color .15s, transform .15s;
     position:relative;
   }
-  .sb-link svg{width:18px;height:18px;flex-shrink:0;opacity:.8;}
+  .sb-link svg{width:20px;height:20px;flex-shrink:0;opacity:.8;}
   .sb-link:hover{ background:var(--surface-soft); color:var(--violet); transform:translateX(4px); }
   .sb-link.active{
     background:linear-gradient(95deg,var(--magenta),var(--violet));
@@ -493,7 +492,7 @@
   <!-- ============ SIDEBAR ============ -->
   <aside class="sidebar" id="sidebar">
     <div class="sb-brand">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/9/97/Logo_PLN.png" alt="PLN Logo" style="width:42px;height:42px;object-fit:contain;flex-shrink:0;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/9/97/Logo_PLN.png" alt="PLN Logo" style="width:70px;height:70px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
       <div>
         <div class="name">ULP Sekura</div>
         <div class="sub">Kinerja Teknik</div>
