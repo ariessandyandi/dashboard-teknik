@@ -628,8 +628,7 @@
         <h5 style="font-size: 0.9rem;"><i class="fa-solid fa-circle-exclamation"></i> Gangguan</h5>
         <h2 id="kpiInterruption" style="font-size: 2rem;">-</h2>
         <div class="d-flex justify-content-between align-items-center mt-2">
-          <span class="text-secondary" style="font-size: 0.8rem;" id="kpiIntTarget">Target: -</span>
-          <span id="trendInt" class="trend-down" style="font-size: 0.8rem;"></span>
+
         </div>
       </div>
     </div>
@@ -883,7 +882,7 @@
       { id: 'SAIDI',        colT: 'B',  rowT: 28, colR: 'B',  rowR: 29, colA: 'B',  rowA: 27 },
       { id: 'SAIFI',        colT: 'O',  rowT: 28, colR: 'O',  rowR: 29, colA: 'O',  rowA: 27 },
       { id: 'ENS',          colT: 'AB', rowT: 28, colR: 'AB', rowR: 29, colA: 'AB', rowA: 27 },
-      { id: 'INTERRUPTION', colT: 'AO', rowT: 60, colR: 'AO', rowR: 60, colA: null, rowA: null },
+      { id: 'INTERRUPTION', colT: 'AO', rowT: 60, colR: 'AG', rowR: 60, colA: null, rowA: null },
     ];
 
     for (const m of metrics) {
@@ -1207,10 +1206,7 @@
       span.className = trendClass;
     } else if (metric === 'INTERRUPTION') {
       document.getElementById('kpiInterruption').innerText = Math.round(totalReal);
-      document.getElementById('kpiIntTarget').innerText = `Target: ${Math.round(totalTarget)}`;
-      const span = document.getElementById('trendInt');
-      span.innerHTML = trendHTML;
-      span.className = trendClass;
+
     }
   }
 
