@@ -1019,19 +1019,53 @@
   const mainContent = document.getElementById('mainContent');
   const collapseBtn = document.getElementById('collapseBtn');
   const collapseIcon = document.getElementById('collapseIcon');
-  let collapsed = false;
+  const mobileBtn = document.getElementById('mobileMenuBtn');
 
+  function handleMobile() {
+    if (window.innerWidth <= 768) {
+      mobileBtn.style.display = 'block';
+      sidebar.classList.remove('collapsed');
+      mainContent.classList.remove('expanded');
+    } else {
+      mobileBtn.style.display = 'none';
+      sidebar.classList.remove('mobile-open');
+      // Auto-collapse saat desktop
+      sidebar.classList.add('collapsed');
+      mainContent.classList.add('expanded');
+    }
+  }
+
+  // Hover auto-expand/collapse di desktop
+  if (window.innerWidth > 768) {
+    sidebar.addEventListener('mouseenter', () => {
+      sidebar.classList.remove('collapsed');
+      mainContent.classList.remove('expanded');
+      setTimeout(() => map.invalidateSize(), 300);
+    });
+    sidebar.addEventListener('mouseleave', () => {
+      sidebar.classList.add('collapsed');
+      mainContent.classList.add('expanded');
+      setTimeout(() => map.invalidateSize(), 300);
+    });
+    // Default collapsed
+    sidebar.classList.add('collapsed');
+    mainContent.classList.add('expanded');
+  }
+
+  // Tombol collapse manual (tetap bisa digunakan)
   collapseBtn.addEventListener('click', () => {
-    collapsed = !collapsed;
-    sidebar.classList.toggle('collapsed', collapsed);
-    mainContent.classList.toggle('expanded', collapsed);
-    collapseIcon.className = collapsed ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left';
+    const isCollapsed = sidebar.classList.toggle('collapsed');
+    mainContent.classList.toggle('expanded', isCollapsed);
+    collapseIcon.className = isCollapsed ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left';
     setTimeout(() => map.invalidateSize(), 300);
   });
 
-  document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+  mobileBtn?.addEventListener('click', () => {
     sidebar.classList.toggle('mobile-open');
   });
+
+  window.addEventListener('resize', handleMobile);
+  handleMobile();
 
   // ====================== ACTIVE ROW ======================
   function setActiveRow(el) {
