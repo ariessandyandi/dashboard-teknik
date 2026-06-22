@@ -882,11 +882,11 @@
       { id: 'SAIDI',        colT: 'B',  rowT: 28, colR: 'B',  rowR: 29, colA: 'B',  rowA: 27 },
       { id: 'SAIFI',        colT: 'O',  rowT: 28, colR: 'O',  rowR: 29, colA: 'O',  rowA: 27 },
       { id: 'ENS',          colT: 'AB', rowT: 28, colR: 'AB', rowR: 29, colA: 'AB', rowA: 27 },
-      // INTERRUPTION ditangani loadGangguanFromLog() dari sheet log (gid=2107201497)
+      { id: 'INTERRUPTION', colT: null, rowT: null, colR: 'AZ', rowR: 27, colA: null, rowA: null },
     ];
 
     for (const m of metrics) {
-      const target = getCell(rows, m.rowT, m.colT) ?? 0;
+      const target = m.colT ? (getCell(rows, m.rowT, m.colT) ?? 0) : 0;
       const real   = getCell(rows, m.rowR, m.colR) ?? 0;
       const actual = m.colA ? (getCell(rows, m.rowA, m.colA) ?? 0) : null;
 
@@ -1231,7 +1231,6 @@
   // ====================== REFRESH SEMUA DASHBOARD ======================
   async function refreshDashboard() {
     await loadKPIFromSheets();
-    await loadGangguanFromLog();
     await renderLineChart();
     await renderStackedBarChart();
     await renderYoYChart();
