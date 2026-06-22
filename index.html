@@ -882,7 +882,7 @@
       { id: 'SAIDI',        colT: 'B',  rowT: 28, colR: 'B',  rowR: 29, colA: 'B',  rowA: 27 },
       { id: 'SAIFI',        colT: 'O',  rowT: 28, colR: 'O',  rowR: 29, colA: 'O',  rowA: 27 },
       { id: 'ENS',          colT: 'AB', rowT: 28, colR: 'AB', rowR: 29, colA: 'AB', rowA: 27 },
-      { id: 'INTERRUPTION', colT: 'AO', rowT: 60, colR: 'AG', rowR: 60, colA: null, rowA: null },
+      // INTERRUPTION ditangani loadGangguanFromLog() dari sheet log (gid=2107201497)
     ];
 
     for (const m of metrics) {
@@ -1211,29 +1211,20 @@
   }
 
 
-  // ====================== HITUNG TOTAL GANGGUAN DARI LOG ======================
+  // ====================== HITUNG TOTAL GANGGUAN DARI LOG SHEET ======================
   async function loadGangguanFromLog() {
     try {
       const resp = await fetch(LOG_CSV_URL_IDX + '&t=' + Date.now());
       if (!resp.ok) throw new Error('HTTP ' + resp.status);
       const text = await resp.text();
-      const lines = text.trim().split('\n').map(l => l.split(','));
-      const header = lines[0].map(h => h.trim().replace(/^\"|"$/g, '').toLowerCase());
-      const iDate = header.findIndex(h => h.includes('tanggal'));
-      let total2026 = 0;
-      for (let i = 1; i < lines.length; i++) {
-        const row = lines[i].map(c => c.trim().replace(/^\"|"$/g, ''));
-        if (!row || row.length < 2) continue;
-        const tgl = iDate >= 0 ? row[iDate] : '';
-        if (!tgl) continue;
-        const yr = tgl.includes('/') ? tgl.split('/')[2] : tgl.split('-')[0];
-        if (yr && yr.trim() === '2026') total2026++;
-      }
-      if (total2026 > 0) {
-        document.getElementById('kpiInterruption').innerText = total2026;
+      const rows = parseCSV(text);
+      // AG = kolom index 32 (A=0, B=1, ... Z=25, AA=26, AB=27, AC=28, AD=29, AE=30, AF=31, AG=32)
+      const val = getCell(rows, 60, 'AG');
+      if (val !== null && val !== undefined && val !== '') {
+        document.getElementById('kpiInterruption').innerText = Math.round(Number(val));
       }
     } catch(err) {
-      console.warn('loadGangguanFromLog gagal, pakai data sheet utama:', err);
+      console.warn('loadGangguanFromLog gagal:', err);
     }
   }
 
