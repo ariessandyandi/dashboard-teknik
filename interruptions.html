@@ -654,7 +654,24 @@
     <div class="panel-full" id="rincian-penyebab">
       <div class="ph">
         <h2>📊 Rincian Penyebab Gangguan</h2>
-        <span class="tag" id="rincianPenyebabTag">Berdasarkan log kejadian</span>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <select id="rcMonthFilter" class="dd" style="min-width:110px;">
+            <option value="-1">Semua Bulan</option>
+            <option value="0">Januari</option>
+            <option value="1">Februari</option>
+            <option value="2">Maret</option>
+            <option value="3">April</option>
+            <option value="4">Mei</option>
+            <option value="5">Juni</option>
+            <option value="6">Juli</option>
+            <option value="7">Agustus</option>
+            <option value="8">September</option>
+            <option value="9">Oktober</option>
+            <option value="10">November</option>
+            <option value="11">Desember</option>
+          </select>
+          <span class="tag" id="rincianPenyebabTag">Berdasarkan log kejadian</span>
+        </div>
       </div>
       <p class="split-hint" style="text-align:left; padding:0; margin:-4px 0 16px;">Akar penyebab per kategori (dari kolom TEMUAN), diurutkan dari yang paling sering terjadi.</p>
       <div id="rincianPenyebabList"></div>
@@ -1242,12 +1259,13 @@ function classifyDetailedCause(item){
 }
 
 // hitung rincian penyebab (root cause) dari TRIP_LOG, respect filter kategori & tahun
-function realRootCauseTotals(cat, year){
+function realRootCauseTotals(cat, year, month){
   const counts = {};
   TRIP_LOG.forEach(item=>{
     const parts = (item.tanggal || '').split('/');
     const yr = parts.length === 3 ? parseInt(parts[2]) : null;
     if(yr !== year) return;
+    if(month !== -1 && item.bulanIdx !== month) return;
     if(cat === 'lt5' && !(item.durasi < 5)) return;
     if(cat === 'gt5' && !(item.durasi >= 5)) return;
     const label = classifyDetailedCause(item);
@@ -1290,14 +1308,16 @@ function renderRincianPenyebab(){
     return;
   }
 
-  const rows = realRootCauseTotals(state.cat, state.year);
+  const rows = realRootCauseTotals(state.cat, state.year, localState.rcMonth);
   if(!rows.length){
     tag.textContent = `Tahun ${state.year}`;
     container.innerHTML = `<p class="empty-state" style="padding:30px 10px;">Tidak ada data kejadian untuk filter ini.</p>`;
     return;
   }
 
-  tag.textContent = `${sum(rows.map(r=>r.count))} kejadian · Tahun ${state.year}`;
+  const rcMonthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const rcMonthLabel = localState.rcMonth === -1 ? 'Semua Bulan' : rcMonthNames[localState.rcMonth];
+  tag.textContent = `${sum(rows.map(r=>r.count))} kejadian · Tahun ${state.year} · ${rcMonthLabel}`;
   const maxCount = Math.max(...rows.map(r=> r.count), 1);
 
   container.innerHTML = rows.map(r=>{
@@ -1313,7 +1333,7 @@ function renderRincianPenyebab(){
 
 
 let state = { year: 2026, cat: "all", month: -1 };
-let localState = { kpSearch: "", kpSort: "total-desc", logSearch: "", logDurasi: "all", logSort: "no-asc", causeMonth: -1, kpCat: "all", logCat: "all", waktuCat: "all" };
+let localState = { kpSearch: "", kpSort: "total-desc", logSearch: "", logDurasi: "all", logSort: "no-asc", causeMonth: -1, kpCat: "all", logCat: "all", waktuCat: "all", rcMonth: -1 };
 // ============================================================
 // HELPERS (state, KPI, sparkline)
 // ============================================================
@@ -1510,6 +1530,18 @@ function renderTrendChart(){
       c.addEventListener("mouseenter", ()=> showTip(container, p[0]/W*container.clientWidth, p[1]/H*container.clientHeight, `<b>${MONTHS_SHORT[i]}</b> · ${s.label}: ${s.data[i]}`));
       c.addEventListener("mouseleave", ()=> hideTip(container));
       svg.appendChild(c);
+      // data label di atas titik (hanya kalau > 0)
+      if(s.data[i] > 0){
+        const lx = p[0];
+        const ly = p[1] - 10;
+        const labelText = String(s.data[i]);
+        const pillW = labelText.length > 1 ? 18 : 14;
+        const bg = svgEl("rect", { x:lx-pillW/2, y:ly-9, width:pillW, height:13, rx:6, fill:s.color, opacity:"0.9" });
+        svg.appendChild(bg);
+        const lt = svgEl("text", { x:lx, y:ly+0.5, "text-anchor":"middle", "dominant-baseline":"middle", "font-size":8.5, "font-weight":800, fill:"#ffffff", "font-family":"Inter" });
+        lt.textContent = labelText;
+        svg.appendChild(lt);
+      }
     });
   });
 
@@ -2156,6 +2188,12 @@ applyTheme(savedTheme);
   window.addEventListener('resize', handleSidebarMobile);
   handleSidebarMobile();
 })();
+
+// ---- local filter: Rincian Penyebab (bulan) ----
+document.getElementById("rcMonthFilter").addEventListener("change", e=>{
+  localState.rcMonth = parseInt(e.target.value);
+  renderRincianPenyebab();
+});
 
 // init
 (async function init(){
