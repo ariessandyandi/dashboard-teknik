@@ -343,10 +343,6 @@
       <span>Reports</span>
     </a>
   </nav>
-  <button class="collapse-btn" id="collapseBtn">
-    <i class="fa-solid fa-chevron-left" id="collapseIcon"></i>
-    <span>Sembunyikan</span>
-  </button>
 </div>
 
 <!-- Main Content -->
@@ -1012,20 +1008,18 @@
   // ====================== THEME ======================
   const themeBtn = document.getElementById('themeToggleBtn');
   const themeIcon = document.getElementById('themeIcon');
-  let lightMode = localStorage.getItem('theme') === 'light';
+  let lightMode = localStorage.getItem('ulpTheme') !== 'dark';
   if (lightMode) { document.body.classList.add('light-mode'); themeIcon.className = 'fa-solid fa-sun'; }
   themeBtn.addEventListener('click', () => {
     lightMode = !lightMode;
     document.body.classList.toggle('light-mode', lightMode);
     themeIcon.className = lightMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-    localStorage.setItem('theme', lightMode ? 'light' : 'dark');
+    localStorage.setItem('ulpTheme', lightMode ? 'light' : 'dark');
   });
 
   // ====================== SIDEBAR ======================
   const sidebar = document.getElementById('sidebar');
   const mainContent = document.getElementById('mainContent');
-  const collapseBtn = document.getElementById('collapseBtn');
-  const collapseIcon = document.getElementById('collapseIcon');
   const mobileBtn = document.getElementById('mobileMenuBtn');
 
   function handleMobile() {
@@ -1058,14 +1052,6 @@
     sidebar.classList.add('collapsed');
     mainContent.classList.add('expanded');
   }
-
-  // Tombol collapse manual (tetap bisa digunakan)
-  collapseBtn.addEventListener('click', () => {
-    const isCollapsed = sidebar.classList.toggle('collapsed');
-    mainContent.classList.toggle('expanded', isCollapsed);
-    collapseIcon.className = isCollapsed ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left';
-    setTimeout(() => map.invalidateSize(), 300);
-  });
 
   mobileBtn?.addEventListener('click', () => {
     sidebar.classList.toggle('mobile-open');
