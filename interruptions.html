@@ -9,58 +9,57 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
   :root{
-    /* ===== ENERGY PULSE PALETTE (LIGHT MODE / DEFAULT) ===== */
-    --bg-deep:#0f172a;
-    --bg-deep-2:#111827;
-    --surface:#ffffff;
-    --surface-soft:#f8f7ff;
+    --bg-color: #0f172a;
+    --card-color: #1e293b;
+    --sidebar-color: #111827;
+    --text-color: white;
+    --text-secondary: #94a3b8;
+    --hover-bg: rgba(59,130,246,0.12);
+    --border-color: rgba(255,255,255,0.05);
+    --shadow-sm: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    --transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+
+    --surface: var(--card-color);
+    --surface-soft: var(--hover-bg);
+    --ink: var(--text-color);
+    --ink-soft: var(--text-secondary);
+    --ink-faint: var(--text-secondary);
+    --hairline: var(--border-color);
 
     --violet:#3b82f6;
     --violet-soft:#60a5fa;
     --pink:#2563eb;
     --magenta:#1d4ed8;
-
     --cyan:#22d3ee;
     --teal:#06b6d4;
-
     --coral:#fb7185;
     --orange:#fb923c;
     --amber:#fbbf24;
 
-    --ink:#0f172a;
-    --ink-soft:#475569;
-    --ink-faint:#94a3b8;
-    --hairline:#e2e8f0;
-
     --r-lg:20px;
     --r-md:14px;
     --r-sm:10px;
-
-    --shadow-card:0 2px 8px rgba(15,23,42,.06), 0 16px 40px -16px rgba(15,23,42,.16);
+    --shadow-card: var(--shadow-sm);
     --shadow-pop:0 10px 30px -8px rgba(59,130,246,.45);
 
     --body-bg-1: none;
     --body-bg-2: none;
-    --body-bg-base: #f1f5fb;
-
-    --sidebar-bg: #ffffff;
+    --body-bg-base: var(--bg-color);
+    --sidebar-bg: var(--sidebar-color);
   }
 
-  [data-theme="dark"]{
-    --surface:#1e293b;
-    --surface-soft:#273449;
-    --ink:#f1f5f9;
-    --ink-soft:#cbd5e1;
-    --ink-faint:#94a3b8;
-    --hairline:#334155;
+  body.light-mode{
+    --bg-color: #f1f5f9;
+    --card-color: #ffffff;
+    --sidebar-color: #eef2ff;
+    --text-color: #0f172a;
+    --text-secondary: #475569;
+    --hover-bg: #e2e8f0;
+    --border-color: rgba(0,0,0,0.05);
+    --shadow-sm: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
 
-    --shadow-card:0 2px 8px rgba(0,0,0,.25), 0 16px 40px -16px rgba(0,0,0,.5);
-
-    --body-bg-1: radial-gradient(1100px 600px at 100% -10%, #16243d 0%, transparent 60%);
-    --body-bg-2: radial-gradient(900px 500px at -10% 100%, #0f1f38 0%, transparent 55%);
-    --body-bg-base: #0f172a;
-
-    --sidebar-bg: linear-gradient(165deg,#111827 0%, #0a0e1a 55%, #05070d 100%);
+    --body-bg-base: var(--bg-color);
+    --sidebar-bg: var(--sidebar-color);
   }
   *{box-sizing:border-box;}
   body{
@@ -199,7 +198,7 @@
     margin-bottom:22px; flex-wrap:wrap; gap:14px;
   }
   .topbar h1{
-    font-size:26px; margin:0 0 5px; font-weight:700; color:var(--ink); letter-spacing:-.02em;
+    font-size:1.8rem; margin:0 0 5px; font-weight:700; color:var(--ink); letter-spacing:-.02em;
   }
   .topbar p{ margin:0; font-size:13.5px; color:var(--ink-soft); }
   .live{
@@ -218,13 +217,12 @@
   .topbar-right{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   .theme-toggle{
     width:44px; height:44px; border-radius:44px;
-    background:var(--surface); border:1px solid var(--hairline);
-    color:var(--ink); font-size:1.1rem; cursor:pointer;
+    background:var(--card-color); border:1px solid var(--border-color);
+    color:var(--text-color); font-size:1.3rem; cursor:pointer;
     display:inline-flex; align-items:center; justify-content:center;
-    box-shadow:var(--shadow-card);
-    transition:all .2s;
+    transition:var(--transition);
   }
-  .theme-toggle:hover{ transform:rotate(15deg); background:var(--surface-soft); }
+  .theme-toggle:hover{ transform:rotate(15deg); background:var(--hover-bg); }
 
   /* ---- FILTER BAR ---- */
   .filterbar{
@@ -502,8 +500,9 @@
     <div class="sb-section-label">Menu</div>
     <a class="sb-link" href="index.html" data-title="Dashboard"><i class="fa-solid fa-chart-line"></i><span>Dashboard</span></a>
     <a class="sb-link" href="data-gardu.html" data-title="Data Gardu"><i class="fa-solid fa-building"></i><span>Data Gardu</span></a>
+    <a class="sb-link" href="KPI.html" data-title="KPI"><i class="fa-solid fa-arrow-trend-up"></i><span>KPI</span></a>
     <a class="sb-link active" href="interruptions.html" data-title="Gangguan"><i class="fa-solid fa-bolt"></i><span>Gangguan</span></a>
-    <a class="sb-link" href="temuan-inspeksi.html" data-title="Temuan Inspeksi"><i class="fa-solid fa-map-location-dot"></i><span>Temuan Inspeksi</span></a>
+    <a class="sb-link" href="inspeksi.html" data-title="Inspeksi"><i class="fa-solid fa-map-location-dot"></i><span>Inspeksi</span></a>
     <a class="sb-link" href="#" data-title="Reports"><i class="fa-solid fa-file-lines"></i><span>Reports</span></a>
 
     <div class="sb-foot">RAW DASHBOARD ARIES<br>Update terakhir: Jun 2026</div>
@@ -514,7 +513,7 @@
 
     <div class="topbar">
       <div>
-        <h1>⚡ Gangguan</h1>
+        <h1>Gangguan</h1>
         <p>Rekap gangguan jaringan</p>
       </div>
       <div class="topbar-right">
@@ -2140,25 +2139,24 @@ setInterval(tick, 1000); tick();
 
 // ---- theme toggle (dark/light) ----
 function applyTheme(theme){
-  if(theme === "dark"){
-    document.documentElement.setAttribute("data-theme","dark");
+  if(theme === "light"){
+    document.body.classList.add("light-mode");
   } else {
-    document.documentElement.removeAttribute("data-theme");
+    document.body.classList.remove("light-mode");
   }
   const icon = document.getElementById("themeIcon");
   if(icon){
-    icon.classList.toggle("fa-moon", theme !== "dark");
-    icon.classList.toggle("fa-sun", theme === "dark");
+    icon.classList.toggle("fa-moon", theme !== "light");
+    icon.classList.toggle("fa-sun", theme === "light");
   }
-  try{ localStorage.setItem("interruptions-theme", theme); }catch(e){}
+  try{ localStorage.setItem("ulpTheme", theme); }catch(e){}
 }
 document.getElementById("themeToggle").addEventListener("click", ()=>{
-  const current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
-  applyTheme(current === "dark" ? "light" : "dark");
+  const current = document.body.classList.contains("light-mode") ? "light" : "dark";
+  applyTheme(current === "light" ? "dark" : "light");
 });
-// load preferensi tersimpan (default: light)
-let savedTheme = "light";
-try{ savedTheme = localStorage.getItem("interruptions-theme") || "light"; }catch(e){}
+let savedTheme = "dark";
+try{ savedTheme = localStorage.getItem("ulpTheme") || "dark"; }catch(e){}
 applyTheme(savedTheme);
 
 // ====================== SIDEBAR & MOBILE ======================
