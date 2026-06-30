@@ -226,8 +226,8 @@ function isLightMode() {
 }
 
 function renderKPIRow() {
-  const idx = selectedMonthIdx === -1 ? globalLastIdx : selectedMonthIdx;
   document.getElementById('kpiRow').innerHTML = allData.map(k => {
+    const idx = selectedMonthIdx === -1 ? k.lastIdx : Math.min(selectedMonthIdx, k.lastIdx);
     const v = k.kinerja[idx];
     const rv = k.real[idx];
     const tv = k.target[idx];
@@ -321,7 +321,6 @@ function renderTrendCharts() {
 }
 
 function renderSummary() {
-  const idx = selectedMonthIdx === -1 ? globalLastIdx : selectedMonthIdx;
   const groups = [
     { title:'Tercapai (>99%)', filter:v=>v>99, cls:'st-ok' },
     { title:'Perhatian (90-99%)', filter:v=>v>=90&&v<=99, cls:'st-warn' },
@@ -330,11 +329,13 @@ function renderSummary() {
 
   document.getElementById('summaryRow').innerHTML = groups.map(g => {
     const items = allData.filter(k => {
+      const idx = selectedMonthIdx === -1 ? k.lastIdx : Math.min(selectedMonthIdx, k.lastIdx);
       const v = k.kinerja[idx];
       return v !== null && g.filter(v);
     });
     const listHtml = items.length
       ? items.map(k => {
+          const idx = selectedMonthIdx === -1 ? k.lastIdx : Math.min(selectedMonthIdx, k.lastIdx);
           const v = k.kinerja[idx];
           return `<div class="summary-item">
             <span>${k.name}</span>
