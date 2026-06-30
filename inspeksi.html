@@ -464,14 +464,9 @@
     <select id="filterPenyulang" onchange="applyFilter()">
       <option value="">Semua Penyulang</option>
     </select>
-    <select id="filterLokasi" onchange="applyFilter()">
-      <option value="">Semua Titik</option>
-      <option value="ADA">📍 Ada Lokasi</option>
-      <option value="TIDAK">⚠️ Tanpa Lokasi</option>
-    </select>
     <input type="text" id="searchInput" placeholder="Cari temuan / lokasi..." oninput="applyFilter()" style="min-width:200px;">
     <label class="label-toggle">
-      <input type="checkbox" id="toggleLabel" checked onchange="applyFilter()">
+      <input type="checkbox" id="toggleLabel" onchange="applyFilter()">
       <span class="switch"></span>
       <i class="fa-solid fa-tag"></i> Label Lokasi di Peta
     </label>
@@ -881,7 +876,6 @@
   function applyFilter() {
     const kat  = document.getElementById('filterKategori').value.toUpperCase();
     const pen  = document.getElementById('filterPenyulang').value.toUpperCase();
-    const lok  = document.getElementById('filterLokasi').value;
     const cari = document.getElementById('searchInput').value.toLowerCase();
 
     filteredData = allData.filter(row => {
@@ -889,11 +883,9 @@
       const penyulang = (row.row['PENYULANG'] || row.row[row.headers[3]] || '').toUpperCase();
       const temuan    = (row.row[row.headers[2]] || '').toLowerCase();
       const lokasi    = (row.row['LOKASI'] || '').toLowerCase();
-      const adaLokasi = hasCoord(row.row);
 
       return (!kat || kategori.includes(kat))
           && (!pen || penyulang.includes(pen))
-          && (!lok || (lok === 'ADA' ? adaLokasi : !adaLokasi))
           && (!cari || temuan.includes(cari) || lokasi.includes(cari));
     });
 
@@ -908,7 +900,6 @@
   function resetFilter() {
     document.getElementById('filterKategori').value = '';
     document.getElementById('filterPenyulang').value = '';
-    document.getElementById('filterLokasi').value = '';
     document.getElementById('searchInput').value = '';
     applyFilter();
   }
