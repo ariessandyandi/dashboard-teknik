@@ -150,7 +150,6 @@ body.light-mode .sidebar.collapsed .nav-link::after { background:#334155; color:
   <div class="topbar">
     <div>
       <h2>KPI</h2>
-      <span class="sub" id="updateTime">Memuat data...</span>
     </div>
     <div class="topbar-actions">
       <select class="filter-select" id="monthSelect"></select>
@@ -179,6 +178,7 @@ body.light-mode .sidebar.collapsed .nav-link::after { background:#334155; color:
 </div>
 
 <script>
+Chart.register(ChartDataLabels);
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTxJWuRpxxFJUaRKp-VdalrXsnbaiD1hwy5B94C7raWEouzlRhVdXAPRSbmnLeEqYUV27r6YhxkFlxe/pub?output=csv&gid=0';
 
 const MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
@@ -297,20 +297,22 @@ function renderTrendCharts() {
       },
       options: {
         responsive: true, maintainAspectRatio: false,
+        layout: { padding: { top: 16 } },
         plugins: {
           legend: { display: false },
           datalabels: {
             display: (ctx) => ctx.dataset.data[ctx.dataIndex] !== null,
             align: 'top',
             anchor: 'end',
+            offset: 4,
             color: tickColor,
             font: { size: 9, weight: '600' },
-            formatter: (v) => v !== null ? v.toFixed(1) : ''
+            formatter: (v) => v !== null ? Math.round(v) : ''
           }
         },
         scales: {
           x: { grid: { display:false }, ticks: { color: tickColor, font:{ size:9 } } },
-          y: { grid: { color: gridColor }, ticks: { color: tickColor, font:{ size:9 } } }
+          y: { min:0, max:250, ticks: { stepSize:50, color: tickColor, font:{ size:9 } }, grid: { color: gridColor } }
         }
       }
     });
@@ -356,7 +358,6 @@ function renderAll() {
 async function loadData() {
   const errBox = document.getElementById('errbox');
   errBox.style.display = 'none';
-  document.getElementById('updateTime').textContent = 'Memuat data...';
 
   try {
     const res = await fetch(CSV_URL + '&t=' + Date.now());
@@ -389,13 +390,9 @@ async function loadData() {
     globalLastIdx = Math.max(...allData.map(k => k.lastIdx));
     buildMonthSelect(globalLastIdx);
     renderAll();
-
-    const now = new Date();
-    document.getElementById('updateTime').textContent = 'Diperbarui: ' + now.toLocaleTimeString('id-ID');
   } catch(e) {
     errBox.style.display = 'block';
     errBox.textContent = 'Gagal memuat data: ' + e.message + '. Pastikan file dijalankan lewat web server (bukan dibuka langsung dari file lokal).';
-    document.getElementById('updateTime').textContent = 'Gagal memuat';
   }
 }
 
