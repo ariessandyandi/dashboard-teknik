@@ -264,6 +264,26 @@
     }
     .filter-bar select:focus, .filter-bar input:focus { border-color: #3b82f6; }
 
+    .label-toggle {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-color); border: 1px solid var(--border-color);
+      border-radius: 10px; padding: 8px 14px; cursor: pointer;
+      font-size: 0.85rem; color: var(--text-color); user-select: none;
+    }
+    .label-toggle .switch {
+      position: relative; width: 36px; height: 20px;
+      background: #475569; border-radius: 999px; flex-shrink: 0;
+      transition: background 0.2s ease;
+    }
+    .label-toggle .switch::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: white; transition: transform 0.2s ease;
+    }
+    .label-toggle input { display: none; }
+    .label-toggle input:checked + .switch { background: #3b82f6; }
+    .label-toggle input:checked + .switch::after { transform: translateX(16px); }
+
     /* LOADING */
     .loading-overlay {
       position: fixed; inset: 0; background: var(--bg-color);
@@ -450,6 +470,11 @@
       <option value="TIDAK">⚠️ Tanpa Lokasi</option>
     </select>
     <input type="text" id="searchInput" placeholder="Cari temuan / lokasi..." oninput="applyFilter()" style="min-width:200px;">
+    <label class="label-toggle">
+      <input type="checkbox" id="toggleLabel" checked onchange="applyFilter()">
+      <span class="switch"></span>
+      <i class="fa-solid fa-tag"></i> Label Lokasi di Peta
+    </label>
     <button onclick="resetFilter()" style="background:#3b82f6; border:none; color:white; padding:8px 16px; border-radius:10px; font-size:0.85rem; cursor:pointer;">
       <i class="fa-solid fa-rotate-left me-1"></i> Reset
     </button>
@@ -783,6 +808,7 @@
     markersLayer.clearLayers();
     let bounds = [];
     let skippedNoCoord = 0;
+    const showLabels = document.getElementById('toggleLabel')?.checked ?? true;
     rows.forEach(row => {
       const lat = parseCoord(LAT_COL ? row[LAT_COL] : (row['LATITUDE (Y)'] || row[headers[6]]));
       const lng = parseCoord(LNG_COL ? row[LNG_COL] : (row['LONGITUDE (X)'] || row[headers[5]]));
@@ -793,7 +819,7 @@
       const icon = getIcon(temuan);
       const marker = L.marker([lat, lng], { icon });
       marker.bindPopup(buildPopup(row, headers), { maxWidth: 300 });
-      if (lokasiLabel) {
+      if (showLabels && lokasiLabel) {
         marker.bindTooltip(lokasiLabel, {
           permanent: true,
           direction: 'top',
