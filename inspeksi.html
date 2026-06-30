@@ -187,6 +187,30 @@
     .legend-icon { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; }
     .legend-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(255,255,255,0.15); }
 
+    /* MARKER LOCATION LABEL */
+    .marker-label {
+      background: rgba(15, 23, 42, 0.85);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      white-space: nowrap;
+    }
+    .marker-label::before {
+      border-top-color: rgba(15, 23, 42, 0.85) !important;
+    }
+    body.light-mode .marker-label {
+      background: rgba(255, 255, 255, 0.95);
+      color: #0f172a;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    body.light-mode .marker-label::before {
+      border-top-color: rgba(255, 255, 255, 0.95) !important;
+    }
+
     /* MAP */
     .map-card {
       background: var(--card-color);
@@ -752,9 +776,18 @@
       if (isNaN(lat) || isNaN(lng)) { skippedNoCoord++; return; }
 
       const temuan = row[headers[2]] || '';
+      const lokasiLabel = row['LOKASI'] || row[headers[4]] || '';
       const icon = getIcon(temuan);
       const marker = L.marker([lat, lng], { icon });
       marker.bindPopup(buildPopup(row, headers), { maxWidth: 300 });
+      if (lokasiLabel) {
+        marker.bindTooltip(lokasiLabel, {
+          permanent: true,
+          direction: 'top',
+          offset: [0, -34],
+          className: 'marker-label'
+        });
+      }
       markersLayer.addLayer(marker);
       bounds.push([lat, lng]);
     });
