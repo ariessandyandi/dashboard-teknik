@@ -444,6 +444,11 @@
     <select id="filterPenyulang" onchange="applyFilter()">
       <option value="">Semua Penyulang</option>
     </select>
+    <select id="filterLokasi" onchange="applyFilter()">
+      <option value="">Semua Titik</option>
+      <option value="ADA">📍 Ada Lokasi</option>
+      <option value="TIDAK">⚠️ Tanpa Lokasi</option>
+    </select>
     <input type="text" id="searchInput" placeholder="Cari temuan / lokasi..." oninput="applyFilter()" style="min-width:200px;">
     <button onclick="resetFilter()" style="background:#3b82f6; border:none; color:white; padding:8px 16px; border-radius:10px; font-size:0.85rem; cursor:pointer;">
       <i class="fa-solid fa-rotate-left me-1"></i> Reset
@@ -528,19 +533,20 @@
           <table id="mainTable">
             <thead>
               <tr>
-                <th onclick="sortTable(0)" style="cursor:pointer;">No <span class="sort-icon">⇅</span></th>
-                <th onclick="sortTable(1)" style="cursor:pointer;">ULP <span class="sort-icon">⇅</span></th>
-                <th onclick="sortTable(2)" style="cursor:pointer;">Temuan <span class="sort-icon">⇅</span></th>
-                <th onclick="sortTable(3)" style="cursor:pointer;">Penyulang <span class="sort-icon">⇅</span></th>
-                <th onclick="sortTable(4)" style="cursor:pointer;">Lokasi <span class="sort-icon">⇅</span></th>
-                <th onclick="sortTable(5)" style="cursor:pointer;">Kategori <span class="sort-icon">⇅</span></th>
-                <th onclick="sortTable(6)" style="cursor:pointer;">Jenis Tiang TM <span class="sort-icon">⇅</span></th>
-                <th onclick="sortTable(7)" style="cursor:pointer;">TR <span class="sort-icon">⇅</span></th>
+                <th onclick="sortTable(0)" data-sort="0" style="cursor:pointer;">No <span class="sort-icon">⇅</span></th>
+                <th onclick="sortTable(1)" data-sort="1" style="cursor:pointer;">ULP <span class="sort-icon">⇅</span></th>
+                <th onclick="sortTable(2)" data-sort="2" style="cursor:pointer;">Temuan <span class="sort-icon">⇅</span></th>
+                <th onclick="sortTable(3)" data-sort="3" style="cursor:pointer;">Penyulang <span class="sort-icon">⇅</span></th>
+                <th onclick="sortTable(4)" data-sort="4" style="cursor:pointer;">Lokasi <span class="sort-icon">⇅</span></th>
+                <th style="text-align:center;">GPS</th>
+                <th onclick="sortTable(5)" data-sort="5" style="cursor:pointer;">Kategori <span class="sort-icon">⇅</span></th>
+                <th onclick="sortTable(6)" data-sort="6" style="cursor:pointer;">Jenis Tiang TM <span class="sort-icon">⇅</span></th>
+                <th onclick="sortTable(7)" data-sort="7" style="cursor:pointer;">TR <span class="sort-icon">⇅</span></th>
                 <th>Evidence</th>
               </tr>
             </thead>
             <tbody id="tabelTemuan">
-              <tr><td colspan="9" style="text-align:center; color:var(--text-secondary); padding:24px;">Memuat data...</td></tr>
+              <tr><td colspan="10" style="text-align:center; color:var(--text-secondary); padding:24px;">Memuat data...</td></tr>
             </tbody>
           </table>
         </div>
@@ -704,6 +710,13 @@
 
     return parseFloat(v);
   }
+
+  // Cek apakah satu baris data punya koordinat lat/lng yang valid (≠ NaN dan ≠ 0,0)
+  function hasCoord(row) {
+    const lat = parseCoord(LAT_COL ? row[LAT_COL] : row['LATITUDE (Y)']);
+    const lng = parseCoord(LNG_COL ? row[LNG_COL] : row['LONGITUDE (X)']);
+    return !isNaN(lat) && !isNaN(lng) && !(lat === 0 && lng === 0);
+  }
   function initMap() {
     map = L.map('map', { zoomControl: true }).setView([1.3, 109.3], 11);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -801,7 +814,7 @@
   function renderTable(rows, headers) {
     const tbody = document.getElementById('tabelTemuan');
     if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--text-secondary);padding:24px;">Tidak ada data ditemukan</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:var(--text-secondary);padding:24px;">Tidak ada data ditemukan</td></tr>`;
       return;
     }
     tbody.innerHTML = rows.map((row, i) => {
@@ -818,6 +831,10 @@
       const evidence = link
         ? `<a href="${link}" target="_blank" style="color:#3b82f6;"><i class="fa-solid fa-link"></i></a>`
         : '-';
+      const gpsOk = hasCoord(row);
+      const gpsBadge = gpsOk
+        ? `<span title="Ada titik koordinat" style="color:#22c55e;"><i class="fa-solid fa-location-dot"></i></span>`
+        : `<span title="Tanpa titik koordinat" style="color:#f59e0b;"><i class="fa-solid fa-triangle-exclamation"></i></span>`;
 
       return `<tr onclick="setActiveRow(this); zoomToRow(${row.__idx})">
         <td>${no}</td>
@@ -825,6 +842,7 @@
         <td>${temuan}</td>
         <td>${penyulang}</td>
         <td>${lokasi}</td>
+        <td style="text-align:center;">${gpsBadge}</td>
         <td><span class="badge-kategori" style="background:${color}22;color:${color};border:1px solid ${color}44;">${kategori}</span></td>
         <td>${jTM}</td>
         <td>${jTR}</td>
@@ -837,6 +855,7 @@
   function applyFilter() {
     const kat  = document.getElementById('filterKategori').value.toUpperCase();
     const pen  = document.getElementById('filterPenyulang').value.toUpperCase();
+    const lok  = document.getElementById('filterLokasi').value;
     const cari = document.getElementById('searchInput').value.toLowerCase();
 
     filteredData = allData.filter(row => {
@@ -844,13 +863,18 @@
       const penyulang = (row.row['PENYULANG'] || row.row[row.headers[3]] || '').toUpperCase();
       const temuan    = (row.row[row.headers[2]] || '').toLowerCase();
       const lokasi    = (row.row['LOKASI'] || '').toLowerCase();
+      const adaLokasi = hasCoord(row.row);
 
       return (!kat || kategori.includes(kat))
           && (!pen || penyulang.includes(pen))
+          && (!lok || (lok === 'ADA' ? adaLokasi : !adaLokasi))
           && (!cari || temuan.includes(cari) || lokasi.includes(cari));
     });
 
-    document.getElementById('filterInfo').textContent = `Menampilkan ${filteredData.length} dari ${allData.length} data`;
+    const totalAda = filteredData.filter(d => hasCoord(d.row)).length;
+    const totalTanpa = filteredData.length - totalAda;
+    document.getElementById('filterInfo').textContent =
+      `Menampilkan ${filteredData.length} dari ${allData.length} data · 📍 ${totalAda} ada lokasi · ⚠️ ${totalTanpa} tanpa lokasi`;
     renderMarkers(filteredData.map(d => d.row), filteredData[0]?.headers || []);
     renderTable(filteredData.map(d => d.row), filteredData[0]?.headers || []);
   }
@@ -858,6 +882,7 @@
   function resetFilter() {
     document.getElementById('filterKategori').value = '';
     document.getElementById('filterPenyulang').value = '';
+    document.getElementById('filterLokasi').value = '';
     document.getElementById('searchInput').value = '';
     applyFilter();
   }
@@ -1017,7 +1042,7 @@
       console.error(err);
       if (!isAutoRefresh) {
         document.getElementById('tabelTemuan').innerHTML =
-          `<tr><td colspan="9" style="text-align:center;color:#ef4444;padding:24px;"><i class="fa-solid fa-triangle-exclamation me-2"></i>Gagal memuat data. Pastikan sheet sudah dipublish.</td></tr>`;
+          `<tr><td colspan="10" style="text-align:center;color:#ef4444;padding:24px;"><i class="fa-solid fa-triangle-exclamation me-2"></i>Gagal memuat data. Pastikan sheet sudah dipublish.</td></tr>`;
       }
     } finally {
       document.getElementById('loadingOverlay').style.display = 'none';
@@ -1136,7 +1161,7 @@
       sortAsc = true;
     }
 
-    const th = document.querySelectorAll('#mainTable thead th')[colIdx];
+    const th = document.querySelector(`#mainTable thead th[data-sort="${colIdx}"]`);
     th.classList.add(sortAsc ? 'sort-asc' : 'sort-desc');
     const icon = th.querySelector('.sort-icon');
     if (icon) icon.textContent = '';
@@ -1162,7 +1187,7 @@
     const headers = filteredData[0].headers;
 
     const wsData = [
-      ['NO', 'ULP', 'TEMUAN', 'PENYULANG', 'LOKASI', 'KATEGORI', 'JENIS TIANG TM', 'JENIS TIANG TR', 'EVIDENCE']
+      ['NO', 'ULP', 'TEMUAN', 'PENYULANG', 'LOKASI', 'STATUS GPS', 'KATEGORI', 'JENIS TIANG TM', 'JENIS TIANG TR', 'EVIDENCE']
     ];
 
     filteredData.forEach((d, i) => {
@@ -1173,6 +1198,7 @@
         row['TEMUAN']         || row[headers[2]]  || '',
         row['PENYULANG']      || row[headers[3]]  || '',
         row['LOKASI']         || row[headers[4]]  || '',
+        hasCoord(row) ? 'Ada Lokasi' : 'Tanpa Lokasi',
         row['KATEGORI']       || row[headers[9]]  || '',
         row['JENIS TIANG TM'] || row[headers[10]] || '',
         row['JENIS TIANG TR'] || row[headers[11]] || '',
