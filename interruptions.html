@@ -449,9 +449,66 @@
     color:var(--ink-faint); font-weight:800; padding:9px 9px; border-bottom:2px solid var(--hairline);
   }
   .log-table tbody td{ padding:8px 9px; border-bottom:1px solid var(--hairline); vertical-align:top;}
+  .log-table tbody tr{ cursor:pointer; transition:background .15s; }
   .log-table tbody tr:hover{ background:var(--surface-soft); }
   .log-scroll{ max-height:340px; overflow-y:auto; border-radius:12px;}
   .chip{ font-size:10px; font-weight:800; padding:3px 9px; border-radius:20px; white-space:nowrap; display:inline-block;}
+
+  .evidence-btn{
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:10.5px; font-weight:700; padding:5px 10px; border-radius:20px;
+    background:var(--hover-bg); color:var(--violet-soft); border:1px solid var(--hairline);
+    cursor:pointer; white-space:nowrap; transition:var(--transition);
+  }
+  .evidence-btn:hover{ background:var(--violet); color:#fff; transform:translateY(-1px); }
+  .evidence-btn.none{ opacity:.45; cursor:default; }
+  .evidence-btn.none:hover{ background:var(--hover-bg); color:var(--violet-soft); transform:none; }
+
+  /* ---- EVIDENCE MODAL ---- */
+  .ev-overlay{
+    position:fixed; inset:0; background:rgba(2,6,23,.72); backdrop-filter:blur(3px);
+    display:none; align-items:center; justify-content:center; z-index:2000; padding:24px;
+  }
+  .ev-overlay.open{ display:flex; }
+  .ev-modal{
+    background:var(--surface); border:1px solid var(--hairline); border-radius:var(--r-lg);
+    width:100%; max-width:560px; max-height:88vh; overflow-y:auto;
+    box-shadow:0 25px 60px -12px rgba(0,0,0,.55);
+    animation:evPop .22s cubic-bezier(.2,.9,.4,1.1);
+  }
+  @keyframes evPop{ from{ opacity:0; transform:translateY(10px) scale(.97);} to{ opacity:1; transform:none;} }
+  .ev-head{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+    padding:20px 22px; border-bottom:1px solid var(--hairline);
+  }
+  .ev-head h3{ margin:0 0 4px; font-size:1.05rem; color:var(--ink); }
+  .ev-head .ev-sub{ font-size:12px; color:var(--ink-soft); }
+  .ev-close{
+    flex-shrink:0; width:34px; height:34px; border-radius:10px; border:1px solid var(--hairline);
+    background:var(--card-color); color:var(--ink-soft); font-size:1rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:var(--transition);
+  }
+  .ev-close:hover{ background:var(--hover-bg); color:var(--ink); }
+  .ev-body{ padding:20px 22px; }
+  .ev-row{ display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--hairline); font-size:13px; }
+  .ev-row:last-child{ border-bottom:none; }
+  .ev-row .k{ width:110px; flex-shrink:0; color:var(--ink-faint); font-weight:600; }
+  .ev-row .v{ color:var(--ink); font-weight:600; }
+  .ev-media{ margin-top:16px; }
+  .ev-media img{ width:100%; border-radius:12px; border:1px solid var(--hairline); display:block; }
+  .ev-media iframe{ width:100%; height:360px; border:1px solid var(--hairline); border-radius:12px; }
+  .ev-media .ev-empty{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    padding:36px 20px; border:1.5px dashed var(--hairline); border-radius:12px;
+    color:var(--ink-faint); font-size:12.5px; text-align:center;
+  }
+  .ev-media .ev-empty i{ font-size:1.6rem; opacity:.6; }
+  .ev-link{
+    margin-top:12px; display:inline-flex; align-items:center; gap:8px;
+    font-size:12.5px; font-weight:700; color:var(--violet-soft); text-decoration:none;
+    background:var(--hover-bg); padding:8px 14px; border-radius:10px; transition:var(--transition);
+  }
+  .ev-link:hover{ background:var(--violet); color:#fff; }
   .chip.weather-hujan{ background:#e0f0ff; color:#1d5fb8;}
   .chip.weather-cerah{ background:#fff3da; color:#b8790a;}
   .chip.dur-short{ background:#dcfce9; color:#0e8a4f;}
@@ -769,7 +826,7 @@
             <tr>
               <th>No</th><th>Bulan</th><th>Keypoint</th><th>Tanggal</th>
               <th>Jam Trip</th><th>Jam Normal</th><th>Durasi</th>
-              <th>Temuan</th><th>Cuaca</th><th>Waktu</th>
+              <th>Temuan</th><th>Cuaca</th><th>Waktu</th><th>Bukti</th>
             </tr>
           </thead>
           <tbody id="logBody"></tbody>
@@ -779,6 +836,28 @@
 
   </main>
 </div>
+
+<!-- ===== EVIDENCE MODAL ===== -->
+<div class="ev-overlay" id="evOverlay">
+  <div class="ev-modal">
+    <div class="ev-head">
+      <div>
+        <h3 id="evTitle">Detail Kejadian</h3>
+        <div class="ev-sub" id="evSub">–</div>
+      </div>
+      <button class="ev-close" id="evClose" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="ev-body">
+      <div class="ev-row"><div class="k">Tanggal</div><div class="v" id="evTanggal">–</div></div>
+      <div class="ev-row"><div class="k">Jam Trip → Normal</div><div class="v" id="evJam">–</div></div>
+      <div class="ev-row"><div class="k">Durasi</div><div class="v" id="evDurasi">–</div></div>
+      <div class="ev-row"><div class="k">Cuaca / Waktu</div><div class="v" id="evCuacaWaktu">–</div></div>
+      <div class="ev-row"><div class="k">Temuan</div><div class="v" id="evTemuan">–</div></div>
+      <div class="ev-media" id="evMedia"></div>
+    </div>
+  </div>
+</div>
+
 
 <script>
 // ============================================================
@@ -1965,25 +2044,27 @@ function renderLogTable(){
   tbody.innerHTML = "";
 
   if(state.year !== 2026){
-    tbody.innerHTML = `<tr><td colspan="10" class="empty-state">Log detail kejadian untuk tahun ${state.year} belum tersedia di sumber data.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="11" class="empty-state">Log detail kejadian untuk tahun ${state.year} belum tersedia di sumber data.</td></tr>`;
     document.getElementById("logTag").textContent = "Tidak ada data";
     return;
   }
 
   let rows = getFilteredLogWithLocal();
+  window.CURRENT_LOG_ROWS = rows;
 
   if(rows.length === 0){
-    tbody.innerHTML = `<tr><td colspan="10" class="empty-state">Tidak ada kejadian yang cocok dengan filter/pencarian ini.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="11" class="empty-state">Tidak ada kejadian yang cocok dengan filter/pencarian ini.</td></tr>`;
     document.getElementById("logTag").textContent = "0 kejadian";
     return;
   }
 
-  rows.forEach(r=>{
+  rows.forEach((r, idx)=>{
     const weatherClass = r.cuaca === "Hujan" ? "weather-hujan" : "weather-cerah";
     const durClass = r.durasi < 5 ? "dur-short" : "dur-long";
     const waktuClass = "waktu-" + r.waktu.toLowerCase();
+    const hasEvidence = !!(r.evidence && r.evidence.trim());
     tbody.innerHTML += `
-      <tr>
+      <tr onclick="openEvidenceModal(${idx})">
         <td>${r.no}</td>
         <td>${MONTHS_FULL[r.bulanIdx]}</td>
         <td style="font-weight:700;">${r.keypoint}</td>
@@ -1994,11 +2075,81 @@ function renderLogTable(){
         <td style="max-width:220px;">${r.temuan}</td>
         <td><span class="chip ${weatherClass}">${r.cuaca === "Hujan" ? "🌧️" : "☀️"} ${r.cuaca}</span></td>
         <td><span class="chip ${waktuClass}">${waktuIcon(r.waktu)} ${r.waktu}</span></td>
+        <td>
+          <button type="button" class="evidence-btn ${hasEvidence ? '' : 'none'}" onclick="event.stopPropagation(); openEvidenceModal(${idx});">
+            <i class="fa-solid ${hasEvidence ? 'fa-image' : 'fa-eye'}"></i> ${hasEvidence ? 'Lihat' : 'Detail'}
+          </button>
+        </td>
       </tr>`;
   });
 
   document.getElementById("logTag").textContent = `${rows.length} kejadian`;
 }
+
+// ============================================================
+// EVIDENCE MODAL
+// ============================================================
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, c=> ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+// terima link Google Drive / gambar langsung / link lain, kembalikan cara terbaik menampilkannya
+function buildEvidenceMedia(url){
+  const clean = (url || "").trim();
+  if(!clean){
+    return `<div class="ev-empty"><i class="fa-solid fa-image-slash"></i><span>Belum ada evidence (foto/dokumen) untuk kejadian ini.</span></div>`;
+  }
+
+  // Google Drive share link -> ambil FILE_ID, tampilkan sebagai preview iframe
+  const driveMatch = clean.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)([a-zA-Z0-9_-]+)/);
+  if(driveMatch){
+    const fileId = driveMatch[1];
+    const previewUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+    return `<iframe src="${previewUrl}" allow="autoplay" loading="lazy"></iframe>
+      <a class="ev-link" href="${clean}" target="_blank" rel="noopener"><i class="fa-solid fa-up-right-from-square"></i> Buka di Google Drive</a>`;
+  }
+
+  // link gambar langsung (jpg/png/webp/gif) -> tampilkan sebagai <img>
+  if(/\.(jpe?g|png|webp|gif)(\?.*)?$/i.test(clean)){
+    return `<img src="${clean}" alt="Evidence kejadian" loading="lazy" onerror="this.outerHTML='<div class=&quot;ev-empty&quot;><i class=&quot;fa-solid fa-triangle-exclamation&quot;></i><span>Gagal memuat gambar evidence.</span></div>';">
+      <a class="ev-link" href="${clean}" target="_blank" rel="noopener"><i class="fa-solid fa-up-right-from-square"></i> Buka gambar penuh</a>`;
+  }
+
+  // fallback: link apapun (pdf, folder, dsb) -> tampilkan sebagai tombol buka
+  return `<div class="ev-empty"><i class="fa-solid fa-paperclip"></i><span>Evidence tersedia sebagai tautan.</span></div>
+    <a class="ev-link" href="${clean}" target="_blank" rel="noopener"><i class="fa-solid fa-up-right-from-square"></i> Buka evidence</a>`;
+}
+
+function openEvidenceModal(idx){
+  const r = (window.CURRENT_LOG_ROWS || [])[idx];
+  if(!r) return;
+
+  document.getElementById("evTitle").textContent = r.keypoint;
+  document.getElementById("evSub").textContent = `Kejadian No. ${r.no} — ${MONTHS_FULL[r.bulanIdx]} 2026`;
+  document.getElementById("evTanggal").textContent = r.tanggal || "–";
+  document.getElementById("evJam").textContent = `${r.trip || "–"} → ${r.normal || "–"}`;
+  document.getElementById("evDurasi").textContent = `${r.durasi} menit`;
+  document.getElementById("evCuacaWaktu").textContent = `${r.cuaca === "Hujan" ? "🌧️" : "☀️"} ${r.cuaca}  •  ${waktuIcon(r.waktu)} ${r.waktu}`;
+  document.getElementById("evTemuan").textContent = r.temuan || "–";
+  document.getElementById("evMedia").innerHTML = buildEvidenceMedia(r.evidence);
+
+  document.getElementById("evOverlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeEvidenceModal(){
+  document.getElementById("evOverlay").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+document.getElementById("evClose").addEventListener("click", closeEvidenceModal);
+document.getElementById("evOverlay").addEventListener("click", e=>{
+  if(e.target.id === "evOverlay") closeEvidenceModal();
+});
+document.addEventListener("keydown", e=>{
+  if(e.key === "Escape") closeEvidenceModal();
+});
+
 
 function waktuIcon(w){
   const map = { Subuh:"🌌", Pagi:"🌅", Siang:"🌤️", Sore:"🌇", Malam:"🌙" };
